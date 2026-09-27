@@ -56,7 +56,8 @@ strong {
 }
 .face-container {
   position: relative;
-  width: min(100%, 420px);
+ width: 280px;
+max-width: 100%;
   margin: 24px auto;
   overflow: hidden;
   border-radius: 18px;
