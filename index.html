@@ -18,16 +18,16 @@
 
     <h2>Choose an area</h2>
 
-    <button>Forehead</button>
-    <button>Glabella</button>
-    <button>Eye Area</button>
-
+ <button class="area-button active" data-area="Forehead">Forehead</button>
+<button class="area-button" data-area="Glabella">Glabella</button>
+<button class="area-button" data-area="Eye Area">Eye Area</button>
+    <p id="selected-area">Selected area: Forehead</p>
     <h2>Simulation intensity</h2>
 
     <label for="intensity">Natural ↔ Smooth</label>
     <br>
     <input id="intensity" type="range" min="0" max="100" value="0">
-
+    <p id="intensity-value">Simulation intensity: 0%</p>
     <p>
       <strong>Educational simulation only.</strong>
       This project does not provide medical advice, treatment recommendations,
