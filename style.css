@@ -56,11 +56,10 @@ strong {
 }
 .face-container {
   position: relative;
-  width: 180px;
+  width: 300px;
   max-width: 100%;
   margin: 24px auto;
   overflow: hidden;
-  border: 4px solid red;
   border-radius: 18px;
   box-shadow: 0 10px 24px rgba(45, 36, 48, 0.14);
 }
