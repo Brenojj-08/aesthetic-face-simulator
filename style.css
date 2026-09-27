@@ -49,3 +49,8 @@ input[type="range"] {
 strong {
   color: #8d3c68;
 }
+.area-button.active {
+  background: #4f1f3b;
+  box-shadow: 0 0 0 3px rgba(141, 60, 104, 0.2);
+  transform: translateY(-2px);
+}
