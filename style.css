@@ -179,3 +179,23 @@ strong {
   outline: 3px solid rgba(59, 130, 246, 0.45);
   outline-offset: 2px;
 }            
+@media (max-width: 600px) {
+  main {
+    width: min(92%, 720px);
+    margin: 24px auto;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  button {
+    width: 100%;
+    margin: 6px 0;
+  }
+
+  .face-container {
+    width: min(100%, 300px);
+  }
+}
