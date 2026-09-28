@@ -3,6 +3,7 @@ const selectedArea = document.getElementById("selected-area");
 const intensity = document.getElementById("intensity");
 const intensityValue = document.getElementById("intensity-value");
 const areaDescription = document.getElementById("area-description");
+const areaDescription = document.getElementById("area-description");
 
 buttons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -39,6 +40,7 @@ buttons.forEach((button) => {
     areaDescription.style.animation = "none";
     areaDescription.offsetHeight;
     areaDescription.style.animation = "fade-in 0.35s ease";
+    overlayLabel.textContent = `Preview: ${intensity.value}%`;
   });
 });
 
