@@ -29,4 +29,9 @@ if (button.dataset.area === "Eye Area") {
 
 intensity.addEventListener("input", () => {
   intensityValue.textContent = `Simulation intensity: ${intensity.value}%`;
+
+  const overlay = document.getElementById("face-overlay");
+  const opacity = Number(intensity.value) / 250;
+
+  overlay.style.opacity = opacity;
 });
