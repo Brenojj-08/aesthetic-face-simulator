@@ -123,3 +123,12 @@ strong {
     transform: translateY(0);
   }
 }
+#overlay-label {
+  display: block;
+  padding-top: 8%;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
