@@ -7,8 +7,50 @@ const overlay = document.getElementById("face-overlay");
 const overlayLabel = document.getElementById("overlay-label");
 const resetButton = document.getElementById("reset-button");
 
-const defaultDescription =
-  "Forehead: this visual demo highlights a common facial expression area.";
+const descriptions = {
+  Forehead: "Forehead: this visual demo highlights a common facial expression area.",
+  Glabella: "Glabella: this visual demo highlights the area between the eyebrows.",
+  "Eye Area": "Eye area: this visual demo highlights the area around the eyes."
+};
+
+function updateInterface() {
+  const activeButton = document.querySelector(".area-button.active");
+  const area = activeButton.dataset.area;
+  const value = Number(intensity.value);
+
+  selectedArea.textContent = `Selected area: ${area}`;
+  intensityValue.textContent = `Simulation intensity: ${value}%`;
+  overlayLabel.textContent = `Preview: ${value}%`;
+
+  overlay.className = "face-overlay";
+
+  if (area === "Forehead") {
+    overlay.classList.add("forehead");
+  }
+
+  if (area === "Glabella") {
+    overlay.classList.add("glabella");
+  }
+
+  if (area === "Eye Area") {
+    overlay.classList.add("eye-area");
+  }
+
+  overlay.style.opacity = value / 250;
+
+  if (value === 0) {
+    areaDescription.textContent = descriptions[area];
+  } else if (value <= 30) {
+    areaDescription.textContent =
+      "Low intensity preview: a subtle visual highlight.";
+  } else if (value <= 70) {
+    areaDescription.textContent =
+      "Moderate intensity preview: a more visible visual highlight.";
+  } else {
+    areaDescription.textContent =
+      "High intensity preview: the strongest visual highlight.";
+  }
+}
 
 buttons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -20,66 +62,11 @@ buttons.forEach((button) => {
     button.classList.add("active");
     button.setAttribute("aria-pressed", "true");
 
-    overlay.className = "face-overlay";
-
-    if (button.dataset.area === "Forehead") {
-      overlay.classList.add("forehead");
-      areaDescription.textContent = defaultDescription;
-    }
-
-    if (button.dataset.area === "Glabella") {
-      overlay.classList.add("glabella");
-      areaDescription.textContent =
-        "Glabella: this visual demo highlights the area between the eyebrows.";
-    }
-
-    if (button.dataset.area === "Eye Area") {
-      overlay.classList.add("eye-area");
-      areaDescription.textContent =
-        "Eye area: this visual demo highlights the area around the eyes.";
-    }
-
-    selectedArea.textContent = `Selected area: ${button.dataset.area}`;
+    updateInterface();
   });
 });
 
-intensity.addEventListener("input", () => {
-  const value = Number(intensity.value);
-
-  intensityValue.textContent = `Simulation intensity: ${value}%`;
-  overlayLabel.textContent = `Preview: ${value}%`;
-
-  if (value === 0) {
-    const activeButton = document.querySelector(".area-button.active");
-    const area = activeButton.dataset.area;
-
-    if (area === "Forehead") {
-      areaDescription.textContent = defaultDescription;
-    }
-
-    if (area === "Glabella") {
-      areaDescription.textContent =
-        "Glabella: this visual demo highlights the area between the eyebrows.";
-    }
-
-    if (area === "Eye Area") {
-      areaDescription.textContent =
-        "Eye area: this visual demo highlights the area around the eyes.";
-    }
-  } else if (value <= 30) {
-    areaDescription.textContent =
-      "Low intensity preview: a subtle visual highlight.";
-  } else if (value <= 70) {
-    areaDescription.textContent =
-      "Moderate intensity preview: a more visible visual highlight.";
-  } else {
-    areaDescription.textContent =
-      "High intensity preview: the strongest visual highlight.";
-  }
-
-  overlay.style.opacity = value / 250;
-});
-});
+intensity.addEventListener("input", updateInterface);
 
 resetButton.addEventListener("click", () => {
   buttons.forEach((button) => {
@@ -90,13 +77,9 @@ resetButton.addEventListener("click", () => {
   buttons[0].classList.add("active");
   buttons[0].setAttribute("aria-pressed", "true");
 
-  selectedArea.textContent = "Selected area: Forehead";
-  areaDescription.textContent = defaultDescription;
-
   intensity.value = 0;
-  intensityValue.textContent = "Simulation intensity: 0%";
 
-  overlay.className = "face-overlay forehead";
-  overlay.style.opacity = 0;
-  overlayLabel.textContent = "Preview: 0%";
+  updateInterface();
 });
+
+updateInterface();
