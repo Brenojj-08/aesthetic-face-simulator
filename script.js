@@ -11,8 +11,13 @@ const defaultDescription =
 
 buttons.forEach((button) => {
   button.addEventListener("click", () => {
-    buttons.forEach((item) => item.classList.remove("active"));
-    button.classList.add("active");
+    buttons.forEach((item) => {
+  item.classList.remove("active");
+  item.setAttribute("aria-pressed", "false");
+});
+
+button.classList.add("active");
+button.setAttribute("aria-pressed", "true");
 
     overlay.className = "face-overlay";
 
@@ -50,8 +55,13 @@ intensity.addEventListener("input", () => {
   overlay.style.opacity = opacity;
 });
 resetButton.addEventListener("click", () => {
-  buttons.forEach((button) => button.classList.remove("active"));
-  buttons[0].classList.add("active");
+  buttons.forEach((button) => {
+  button.classList.remove("active");
+  button.setAttribute("aria-pressed", "false");
+});
+
+buttons[0].classList.add("active");
+buttons[0].setAttribute("aria-pressed", "true");
 
   selectedArea.textContent = "Selected area: Forehead";
   areaDescription.textContent = defaultDescription;
