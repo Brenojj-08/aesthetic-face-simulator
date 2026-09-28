@@ -102,3 +102,24 @@ strong {
   height: 17%;
   opacity: 0.35;
 }
+#area-description {
+  min-height: 48px;
+  padding: 12px 14px;
+  background: #fff4f8;
+  border-left: 4px solid #8d3c68;
+  border-radius: 8px;
+  line-height: 1.5;
+  animation: fade-in 0.35s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
