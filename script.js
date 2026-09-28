@@ -5,6 +5,9 @@ const intensityValue = document.getElementById("intensity-value");
 const areaDescription = document.getElementById("area-description");
 const overlay = document.getElementById("face-overlay");
 const overlayLabel = document.getElementById("overlay-label");
+const resetButton = document.getElementById("reset-button");
+const defaultDescription =
+  "Forehead: this visual demo highlights a common facial expression area.";
 
 buttons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -45,4 +48,19 @@ intensity.addEventListener("input", () => {
 
   const opacity = Number(intensity.value) / 250;
   overlay.style.opacity = opacity;
+});
+resetButton.addEventListener("click", () => {
+  buttons.forEach((button) => button.classList.remove("active"));
+  buttons[0].classList.add("active");
+
+  selectedArea.textContent = "Selected area: Forehead";
+  areaDescription.textContent = defaultDescription;
+
+  intensity.value = 0;
+  intensityValue.textContent = "Simulation intensity: 0%";
+
+  overlay.className = "face-overlay forehead";
+  overlay.style.opacity = 0;
+
+  overlayLabel.textContent = "Preview: 0%";
 });
