@@ -49,7 +49,36 @@ intensity.addEventListener("input", () => {
   intensityValue.textContent = `Simulation intensity: ${value}%`;
   overlayLabel.textContent = `Preview: ${value}%`;
 
+  if (value === 0) {
+    const activeButton = document.querySelector(".area-button.active");
+    const area = activeButton.dataset.area;
+
+    if (area === "Forehead") {
+      areaDescription.textContent = defaultDescription;
+    }
+
+    if (area === "Glabella") {
+      areaDescription.textContent =
+        "Glabella: this visual demo highlights the area between the eyebrows.";
+    }
+
+    if (area === "Eye Area") {
+      areaDescription.textContent =
+        "Eye area: this visual demo highlights the area around the eyes.";
+    }
+  } else if (value <= 30) {
+    areaDescription.textContent =
+      "Low intensity preview: a subtle visual highlight.";
+  } else if (value <= 70) {
+    areaDescription.textContent =
+      "Moderate intensity preview: a more visible visual highlight.";
+  } else {
+    areaDescription.textContent =
+      "High intensity preview: the strongest visual highlight.";
+  }
+
   overlay.style.opacity = value / 250;
+});
 });
 
 resetButton.addEventListener("click", () => {
