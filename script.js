@@ -36,7 +36,7 @@ function updateInterface() {
     overlay.classList.add("eye-area");
   }
 
-  overlay.style.opacity = value / 250;
+  overlay.style.opacity = value / 143;
 
   if (value === 0) {
     areaDescription.textContent = descriptions[area];
