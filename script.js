@@ -38,6 +38,9 @@ if (button.dataset.area === "Glabella") {
 if (button.dataset.area === "Eye Area") {
   areaDescription.textContent =
     "Eye area: this visual demo highlights the area around the eyes.";
+  areaDescription.style.animation = "none";
+areaDescription.offsetHeight;
+areaDescription.style.animation = "fade-in 0.35s ease";
 }
   });
 });
