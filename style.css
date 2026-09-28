@@ -72,10 +72,10 @@ strong {
 
 .face-overlay {
   position: absolute;
-  top: 12%;
-  left: 25%;
-  width: 50%;
-  height: 16%;
+  top: 18%;
+  left: 27%;
+  width: 46%;
+  height: 15%;
   border-radius: 50%;
   background: rgba(141, 60, 104, 0.3);
   border: 2px solid rgba(141, 60, 104, 0.7);
@@ -85,22 +85,50 @@ strong {
 }
 
 .face-overlay.forehead {
-  opacity: 0.35;
+  top: 18%;
+  left: 27%;
+  width: 46%;
+  height: 15%;
 }
+
 .face-overlay.glabella {
-  top: 29%;
-  left: 42%;
-  width: 16%;
-  height: 13%;
-  opacity: 0.35;
+  top: 35%;
+  left: 44%;
+  width: 12%;
+  height: 10%;
 }
 
 .face-overlay.eye-area {
-  top: 39%;
-  left: 15%;
-  width: 70%;
-  height: 17%;
-  opacity: 0.35;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 0;
+}
+
+.eye-marker {
+  position: absolute;
+  top: 41%;
+  width: 18%;
+  height: 10%;
+  border-radius: 50%;
+  background: rgba(141, 60, 104, 0.3);
+  border: 2px solid rgba(141, 60, 104, 0.7);
+  display: none;
+}
+
+.eye-marker-left {
+  left: 20%;
+}
+
+.eye-marker-right {
+  right: 20%;
+}
+
+.face-overlay.eye-area .eye-marker {
+  display: block;
+}
 }
 #area-description {
   min-height: 48px;
@@ -153,4 +181,7 @@ strong {
 #reset-button:focus-visible {
   outline: 3px solid rgba(59, 130, 246, 0.45);
   outline-offset: 2px;
+}
+#overlay-label {
+  display: none;
 }
