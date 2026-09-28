@@ -48,11 +48,27 @@ button.setAttribute("aria-pressed", "true");
 });
 
 intensity.addEventListener("input", () => {
-  intensityValue.textContent = `Simulation intensity: ${intensity.value}%`;
-  overlayLabel.textContent = `Preview: ${intensity.value}%`;
+  const value = Number(intensity.value);
 
-  const opacity = Number(intensity.value) / 250;
+  intensityValue.textContent = `Simulation intensity: ${value}%`;
+  overlayLabel.textContent = `Preview: ${value}%`;
+
+  if (value === 0) {
+    areaDescription.textContent = defaultDescription;
+  } else if (value <= 30) {
+    areaDescription.textContent =
+      "Low intensity preview: a subtle visual highlight.";
+  } else if (value <= 70) {
+    areaDescription.textContent =
+      "Moderate intensity preview: a more visible visual highlight.";
+  } else {
+    areaDescription.textContent =
+      "High intensity preview: the strongest visual highlight.";
+  }
+
+  const opacity = value / 250;
   overlay.style.opacity = opacity;
+});
 });
 resetButton.addEventListener("click", () => {
   buttons.forEach((button) => {
