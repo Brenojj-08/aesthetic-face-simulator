@@ -2,6 +2,7 @@ const buttons = document.querySelectorAll(".area-button");
 const selectedArea = document.getElementById("selected-area");
 const intensity = document.getElementById("intensity");
 const intensityValue = document.getElementById("intensity-value");
+const areaDescription = document.getElementById("area-description");
 
 buttons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -24,6 +25,20 @@ if (button.dataset.area === "Eye Area") {
 }
 
     selectedArea.textContent = `Selected area: ${button.dataset.area}`;
+    if (button.dataset.area === "Forehead") {
+  areaDescription.textContent =
+    "Forehead: this visual demo highlights a common facial expression area.";
+}
+
+if (button.dataset.area === "Glabella") {
+  areaDescription.textContent =
+    "Glabella: this visual demo highlights the area between the eyebrows.";
+}
+
+if (button.dataset.area === "Eye Area") {
+  areaDescription.textContent =
+    "Eye area: this visual demo highlights the area around the eyes.";
+}
   });
 });
 
