@@ -7,6 +7,21 @@ buttons.forEach((button) => {
   button.addEventListener("click", () => {
     buttons.forEach((item) => item.classList.remove("active"));
     button.classList.add("active");
+    const overlay = document.getElementById("face-overlay");
+
+overlay.className = "face-overlay";
+
+if (button.dataset.area === "Forehead") {
+  overlay.classList.add("forehead");
+}
+
+if (button.dataset.area === "Glabella") {
+  overlay.classList.add("glabella");
+}
+
+if (button.dataset.area === "Eye Area") {
+  overlay.classList.add("eye-area");
+}
 
     selectedArea.textContent = `Selected area: ${button.dataset.area}`;
   });
