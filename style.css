@@ -49,11 +49,13 @@ input[type="range"] {
 strong {
   color: #8d3c68;
 }
+
 .area-button.active {
   background: #4f1f3b;
   box-shadow: 0 0 0 3px rgba(141, 60, 104, 0.2);
   transform: translateY(-2px);
 }
+
 .face-container {
   position: relative;
   width: 300px;
@@ -127,8 +129,7 @@ strong {
 }
 
 .face-overlay.eye-area .eye-marker {
-  display: block;
-}
+ display: block;
 }
 #area-description {
   min-height: 48px;
@@ -151,15 +152,11 @@ strong {
     transform: translateY(0);
   }
 }
+
 #overlay-label {
-  display: block;
-  padding-top: 8%;
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  display: none;
 }
+
 #reset-button {
   display: block;
   margin-top: 14px;
@@ -181,7 +178,4 @@ strong {
 #reset-button:focus-visible {
   outline: 3px solid rgba(59, 130, 246, 0.45);
   outline-offset: 2px;
-}
-#overlay-label {
-  display: none;
-}
+}            
