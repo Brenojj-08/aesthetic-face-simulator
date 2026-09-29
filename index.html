@@ -58,21 +58,50 @@
     <p id="area-description">
   Forehead: this visual demo highlights a common facial expression area.
 </p>
-    <div class="face-container">
-  <img src="face-model.jpg.png" alt="Fictional face model for educational simulation">
+<div class="face-container">
+ <img
+  id="face-image"
+  src="face-model.jpg.png"
+  alt="Fictional face model for educational simulation"
+  draggable="false"
+>
 
-  <div id="face-overlay" class="face-overlay forehead">
-  <span class="eye-marker eye-marker-left"></span>
-  <span class="eye-marker eye-marker-right"></span>
-  <span id="overlay-label">Preview: 0%</span>
-</div>
+  <canvas id="smoothing-canvas" aria-hidden="true"></canvas>
+
+  <div
+    id="face-overlay"
+    class="face-overlay forehead"
+    role="group"
+    aria-label="Adjustable treatment area"
+  >
+    <span class="eye-marker eye-marker-left"></span>
+    <span class="eye-marker eye-marker-right"></span>
+    <span id="overlay-label">Preview: 0%</span>
+
+    <button
+      id="resize-handle"
+      class="resize-handle"
+      type="button"
+      aria-label="Resize treatment area"
+    ></button>
+  </div>
 </div>
     <h2>Visual preview level</h2>
 
     <label for="intensity">Subtle ↔ Enhanced</label>
     <br>
     <input id="intensity" type="range" min="0" max="100" value="0">
-    <p id="intensity-value">Simulation intensity: 0%</p>
+   <p id="intensity-value">Simulation intensity: 0%</p>
+
+<label for="photo-upload">Choose a photo</label>
+<br>
+<input
+  id="photo-upload"
+  type="file"
+  accept="image/png, image/jpeg, image/webp"
+>
+
+<p id="photo-status" aria-live="polite">Showing the example image.</p>
 
 <section class="built-with" aria-labelledby="built-with-title">
   <h2 id="built-with-title">Built with</h2>
