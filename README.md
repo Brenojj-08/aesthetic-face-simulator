@@ -11,6 +11,7 @@ An educational visual simulator for facial aesthetics concepts.
 - Accessible selection state with `aria-pressed`
 - Responsive layout for mobile screens
 - “How it works” section with usage instructions
+- Visible keyboard focus styles for interactive controls
 
 ## Technologies
 
