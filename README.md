@@ -12,6 +12,7 @@ An educational visual simulator for facial aesthetics concepts.
 - Responsive layout for mobile screens
 - “How it works” section with usage instructions
 - Visible keyboard focus styles for interactive controls
+- Built with section highlighting HTML, CSS, JavaScript, Git, and GitHub Pages
 
 ## Technologies
 

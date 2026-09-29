@@ -220,3 +220,31 @@ input[type="range"]:focus-visible {
   padding-left: 22px;
   line-height: 1.6;
 }
+
+.built-with {
+  margin: 28px 0 20px;
+}
+
+.built-with h2 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+}
+
+.technology-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.technology-list li {
+  padding: 8px 12px;
+  border: 1px solid rgba(141, 60, 104, 0.28);
+  border-radius: 999px;
+  background: #fff4f8;
+  color: #6f2d51;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
