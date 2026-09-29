@@ -1,10 +1,14 @@
 const areaButtons = document.querySelectorAll(".area-button");
 const selectedArea = document.getElementById("selected-area");
 const areaDescription = document.getElementById("area-description");
-const faceOverlay = document.getElementById("face-overlay");
-const overlayLabel = document.getElementById("overlay-label");
-const resizeHandle = document.getElementById("resize-handle");
 const resetButton = document.getElementById("reset-button");
+
+const addAreaButton = document.getElementById("add-area-button");
+const deleteAreaButton = document.getElementById("delete-area-button");
+const previewResultButton = document.getElementById("preview-result-button");
+const editResultButton = document.getElementById("edit-result-button");
+const downloadResultButton = document.getElementById("download-result-button");
+
 const intensity = document.getElementById("intensity");
 const intensityValue = document.getElementById("intensity-value");
 
@@ -17,170 +21,25 @@ const smoothingCanvas = document.getElementById("smoothing-canvas");
 const smoothingContext = smoothingCanvas.getContext("2d");
 
 const areaDescriptions = {
-  Forehead: "Forehead: this visual demo highlights a common facial expression area.",
-  Glabella: "Glabella: this visual demo highlights the area between the eyebrows.",
-  "Eye Area": "Eye Area: this visual demo highlights the area around the eyes."
+  Forehead: "Forehead: creates a new adjustable area near the forehead.",
+  Glabella: "Glabella: creates a new adjustable area between the eyebrows.",
+  "Eye Area": "Eye Area: creates a new adjustable area around the eyes."
 };
 
 let selectedPhotoUrl = "";
-
-const treatmentArea = {
-  x: 27,
-  y: 18,
-  width: 46,
-  height: 28
-};
-
+let selectedAreaId = null;
 let interaction = null;
+let nextAreaId = 1;
+let isPreviewing = false;
+let isShowingBefore = false;
+let treatmentAreas = [];
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
 }
 
-function applyTreatmentArea() {
-  faceOverlay.style.left = `${treatmentArea.x}%`;
-  faceOverlay.style.top = `${treatmentArea.y}%`;
-  faceOverlay.style.width = `${treatmentArea.width}%`;
-  faceOverlay.style.height = `${treatmentArea.height}%`;
-}
-
-function getSmoothingArea(displayWidth, displayHeight) {
-  return {
-    centerX: displayWidth * ((treatmentArea.x + treatmentArea.width / 2) / 100),
-    centerY: displayHeight * ((treatmentArea.y + treatmentArea.height / 2) / 100),
-    radiusX: displayWidth * (treatmentArea.width / 200),
-    radiusY: displayHeight * (treatmentArea.height / 200)
-  };
-}
-
-function drawSmoothing() {
-  if (!faceImage.complete || !faceImage.naturalWidth) {
-    return;
-  }
-
-  const displayWidth = faceImage.clientWidth;
-  const displayHeight = faceImage.clientHeight;
-
-  if (!displayWidth || !displayHeight) {
-    return;
-  }
-
-  smoothingCanvas.width = displayWidth;
-  smoothingCanvas.height = displayHeight;
-
-  smoothingContext.clearRect(0, 0, displayWidth, displayHeight);
-
-  const value = Number(intensity.value);
-
-  if (value === 0) {
-    return;
-  }
-
-  const { centerX, centerY, radiusX, radiusY } = getSmoothingArea(
-    displayWidth,
-    displayHeight
-  );
-
-  const blurAmount = 0.35 + (value / 100) * 1.65;
-  const effectOpacity = 0.16 + (value / 100) * 0.38;
-  const innerRadiusX = radiusX * 0.86;
-  const innerRadiusY = radiusY * 0.86;
-
-  smoothingContext.save();
-
-  smoothingContext.beginPath();
-  smoothingContext.ellipse(
-    centerX,
-    centerY,
-    innerRadiusX,
-    innerRadiusY,
-    0,
-    0,
-    Math.PI * 2
-  );
-  smoothingContext.clip();
-
-  smoothingContext.filter = `blur(${blurAmount}px)`;
-  smoothingContext.globalAlpha = effectOpacity;
-
-  smoothingContext.drawImage(
-    faceImage,
-    0,
-    0,
-    faceImage.naturalWidth,
-    faceImage.naturalHeight,
-    0,
-    0,
-    displayWidth,
-    displayHeight
-  );
-
-  smoothingContext.restore();
-
-}
-
-function updateSimulation() {
-  const value = Number(intensity.value);
-  const opacity = 0.2 + (value / 100) * 0.3;
-
-  intensityValue.textContent = `Simulation intensity: ${value}%`;
-  overlayLabel.textContent = `Preview: ${value}%`;
-
-  faceOverlay.style.opacity = String(opacity);
-
-  applyTreatmentArea();
-  drawSmoothing();
-}
-
-function selectArea(button) {
-  const area = button.dataset.area;
-
-  areaButtons.forEach((areaButton) => {
-    const isSelected = areaButton === button;
-
-    areaButton.classList.toggle("active", isSelected);
-    areaButton.setAttribute("aria-pressed", String(isSelected));
-  });
-
-  selectedArea.textContent = `Selected area: ${area}`;
-  areaDescription.textContent = areaDescriptions[area];
-
-  faceOverlay.classList.remove("forehead", "glabella", "eye-area");
-
-  if (area === "Forehead") {
-    Object.assign(treatmentArea, {
-      x: 27,
-      y: 18,
-      width: 46,
-      height: 28
-    });
-
-    faceOverlay.classList.add("forehead");
-  }
-
-  if (area === "Glabella") {
-    Object.assign(treatmentArea, {
-      x: 35,
-      y: 31,
-      width: 30,
-      height: 16
-    });
-
-    faceOverlay.classList.add("glabella");
-  }
-
-  if (area === "Eye Area") {
-    Object.assign(treatmentArea, {
-      x: 22,
-      y: 35,
-      width: 56,
-      height: 24
-    });
-
-    faceOverlay.classList.add("eye-area");
-  }
-
-  updateSimulation();
+function getSelectedTreatmentArea() {
+  return treatmentAreas.find((area) => area.id === selectedAreaId) || null;
 }
 
 function pointerToPercent(event) {
@@ -192,116 +51,497 @@ function pointerToPercent(event) {
   };
 }
 
-faceOverlay.addEventListener("pointerdown", (event) => {
-  if (event.target === resizeHandle) {
+function createTreatmentArea(config = {}) {
+  const area = {
+    id: nextAreaId,
+    x: config.x ?? 30,
+    y: config.y ?? 25,
+    width: config.width ?? 40,
+    height: config.height ?? 24,
+    intensity: config.intensity ?? 0
+  };
+
+  nextAreaId += 1;
+  treatmentAreas.push(area);
+  selectedAreaId = area.id;
+
+  updateSimulation();
+}
+
+function deleteSelectedTreatmentArea() {
+  if (!selectedAreaId || isPreviewing) {
     return;
   }
 
-  event.preventDefault();
-  faceOverlay.setPointerCapture(event.pointerId);
+  treatmentAreas = treatmentAreas.filter((area) => area.id !== selectedAreaId);
 
-  const pointer = pointerToPercent(event);
+  selectedAreaId = treatmentAreas.length
+    ? treatmentAreas[treatmentAreas.length - 1].id
+    : null;
 
-  interaction = {
-    type: "move",
-    pointerId: event.pointerId,
-    offsetX: pointer.x - treatmentArea.x,
-    offsetY: pointer.y - treatmentArea.y
-  };
-});
+  updateSimulation();
+}
 
-resizeHandle.addEventListener("pointerdown", (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  resizeHandle.setPointerCapture(event.pointerId);
+function renderTreatmentAreas() {
+  faceContainer
+    .querySelectorAll(".treatment-area")
+    .forEach((element) => element.remove());
 
-  interaction = {
-    type: "resize",
-    pointerId: event.pointerId,
-    startX: treatmentArea.x,
-    startY: treatmentArea.y,
-    startWidth: treatmentArea.width,
-    startHeight: treatmentArea.height,
-    pointerStart: pointerToPercent(event)
-  };
-});
+  treatmentAreas.forEach((area) => {
+    const element = document.createElement("div");
+
+    element.className = "treatment-area";
+
+    if (area.id === selectedAreaId) {
+      element.classList.add("is-selected");
+    }
+
+    element.style.left = `${area.x}%`;
+    element.style.top = `${area.y}%`;
+    element.style.width = `${area.width}%`;
+    element.style.height = `${area.height}%`;
+
+    element.innerHTML = `
+      <button
+        class="resize-handle resize-handle-both"
+        type="button"
+        aria-label="Redimensionar área de tratamento"
+      ></button>
+    `;
+
+    const resizeHandle = element.querySelector(".resize-handle-both");
+
+    element.addEventListener("pointerdown", (event) => {
+      if (isPreviewing || event.target === resizeHandle) {
+        return;
+      }
+
+      event.preventDefault();
+      element.setPointerCapture(event.pointerId);
+
+      selectedAreaId = area.id;
+
+      const pointer = pointerToPercent(event);
+
+      interaction = {
+        type: "move",
+        pointerId: event.pointerId,
+        areaId: area.id,
+        offsetX: pointer.x - area.x,
+        offsetY: pointer.y - area.y
+      };
+
+      updateSimulation();
+    });
+
+    resizeHandle.addEventListener("pointerdown", (event) => {
+      if (isPreviewing) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      resizeHandle.setPointerCapture(event.pointerId);
+
+      selectedAreaId = area.id;
+
+      interaction = {
+        type: "resize-both",
+        pointerId: event.pointerId,
+        areaId: area.id,
+        startWidth: area.width,
+        startHeight: area.height,
+        pointerStart: pointerToPercent(event)
+      };
+
+      updateSimulation();
+    });
+
+    faceContainer.appendChild(element);
+  });
+}
+
+function drawSmoothingOn(context, width, height) {
+  treatmentAreas.forEach((area) => {
+    if (area.intensity === 0) {
+      return;
+    }
+
+    const centerX = width * ((area.x + area.width / 2) / 100);
+    const centerY = height * ((area.y + area.height / 2) / 100);
+    const radiusX = width * (area.width / 200) * 0.84;
+    const radiusY = height * (area.height / 200) * 0.84;
+
+    const blurAmount = 0.25 + (area.intensity / 100) * 1.7;
+    const effectOpacity = 0.12 + (area.intensity / 100) * 0.32;
+
+    context.save();
+
+    context.beginPath();
+    context.ellipse(
+      centerX,
+      centerY,
+      radiusX,
+      radiusY,
+      0,
+      0,
+      Math.PI * 2
+    );
+    context.clip();
+
+    context.filter = `blur(${blurAmount}px)`;
+    context.globalAlpha = effectOpacity;
+
+    context.drawImage(
+      faceImage,
+      0,
+      0,
+      faceImage.naturalWidth,
+      faceImage.naturalHeight,
+      0,
+      0,
+      width,
+      height
+    );
+
+    context.restore();
+  });
+}
+
+function drawSmoothing() {
+  if (!faceImage.complete || !faceImage.naturalWidth) {
+    return;
+  }
+
+  const width = faceImage.clientWidth;
+  const height = faceImage.clientHeight;
+
+  if (!width || !height) {
+    return;
+  }
+
+  smoothingCanvas.width = width;
+  smoothingCanvas.height = height;
+
+  smoothingContext.clearRect(0, 0, width, height);
+  drawSmoothingOn(smoothingContext, width, height);
+}
+
+function downloadEditedImage() {
+  if (!faceImage.complete || !faceImage.naturalWidth) {
+    return;
+  }
+
+  const exportCanvas = document.createElement("canvas");
+  const exportContext = exportCanvas.getContext("2d");
+
+  exportCanvas.width = faceImage.naturalWidth;
+  exportCanvas.height = faceImage.naturalHeight;
+
+  exportContext.drawImage(
+    faceImage,
+    0,
+    0,
+    exportCanvas.width,
+    exportCanvas.height
+  );
+
+  drawSmoothingOn(
+    exportContext,
+    exportCanvas.width,
+    exportCanvas.height
+  );
+
+  exportCanvas.toBlob((blob) => {
+    if (!blob) {
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "aesthetic-face-preview-hd.png";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }, "image/png");
+}
+function showBeforeImage() {
+  if (!isPreviewing) {
+    return;
+  }
+
+  isShowingBefore = true;
+  smoothingCanvas.style.opacity = "0";
+  previewResultButton.textContent = "Solte para ver o depois";
+}
+
+function showAfterImage() {
+  if (!isPreviewing) {
+    return;
+  }
+
+  isShowingBefore = false;
+  smoothingCanvas.style.opacity = "1";
+  previewResultButton.textContent = "Segure para ver o antes";
+}
+function setPreviewMode(previewing) {
+  isPreviewing = previewing;
+  faceContainer.classList.toggle("is-previewing", previewing);
+
+  previewResultButton.hidden = previewing;
+  editResultButton.hidden = !previewing;
+
+  addAreaButton.disabled = previewing;
+  deleteAreaButton.disabled = previewing;
+  intensity.disabled = previewing;
+  photoUpload.disabled = previewing;
+  resetButton.disabled = previewing;
+
+  areaButtons.forEach((button) => {
+    button.disabled = previewing;
+  });
+
+  if (previewing) {
+  isShowingBefore = false;
+  smoothingCanvas.style.opacity = "1";
+
+  previewResultButton.hidden = false;
+  previewResultButton.textContent = "Segure para ver o antes";
+
+  intensityValue.textContent =
+    "Segure o botão para comparar a imagem antes e depois.";
+} else {
+  isShowingBefore = false;
+  smoothingCanvas.style.opacity = "1";
+
+  previewResultButton.textContent = "Ver resultado";
+  updateSimulation();
+}
+}
+
+function updateSimulation() {
+  const area = getSelectedTreatmentArea();
+
+  renderTreatmentAreas();
+  drawSmoothing();
+
+  if (!area) {
+    intensity.disabled = true;
+    deleteAreaButton.disabled = true;
+    intensity.value = "0";
+    intensityValue.textContent = "No treatment area selected.";
+    return;
+  }
+
+  if (!isPreviewing) {
+    intensity.disabled = false;
+    deleteAreaButton.disabled = false;
+    intensity.value = String(area.intensity);
+    intensityValue.textContent = `Area ${area.id} intensity: ${area.intensity}%`;
+  }
+}
+
+function selectAreaPreset(button) {
+  if (isPreviewing) {
+    return;
+  }
+
+  const areaName = button.dataset.area;
+
+  areaButtons.forEach((areaButton) => {
+    const isSelected = areaButton === button;
+
+    areaButton.classList.toggle("active", isSelected);
+    areaButton.setAttribute("aria-pressed", String(isSelected));
+  });
+
+  selectedArea.textContent = `Preset selected: ${areaName}`;
+  areaDescription.textContent = areaDescriptions[areaName];
+
+  if (areaName === "Forehead") {
+    createTreatmentArea({ x: 27, y: 18, width: 46, height: 28 });
+  }
+
+  if (areaName === "Glabella") {
+    createTreatmentArea({ x: 35, y: 31, width: 30, height: 16 });
+  }
+
+  if (areaName === "Eye Area") {
+    createTreatmentArea({ x: 22, y: 35, width: 56, height: 24 });
+  }
+}
 
 document.addEventListener("pointermove", (event) => {
-  if (!interaction || event.pointerId !== interaction.pointerId) {
+  if (isPreviewing || !interaction || event.pointerId !== interaction.pointerId) {
+    return;
+  }
+
+  const area = treatmentAreas.find(
+    (treatmentArea) => treatmentArea.id === interaction.areaId
+  );
+
+  if (!area) {
+    interaction = null;
     return;
   }
 
   const pointer = pointerToPercent(event);
 
   if (interaction.type === "move") {
-    treatmentArea.x = clamp(
-      pointer.x - interaction.offsetX,
-      0,
-      100 - treatmentArea.width
-    );
-
-    treatmentArea.y = clamp(
-      pointer.y - interaction.offsetY,
-      0,
-      100 - treatmentArea.height
-    );
+    area.x = clamp(pointer.x - interaction.offsetX, 0, 100 - area.width);
+    area.y = clamp(pointer.y - interaction.offsetY, 0, 100 - area.height);
   }
 
-  if (interaction.type === "resize") {
-    const changeX = pointer.x - interaction.pointerStart.x;
-    const changeY = pointer.y - interaction.pointerStart.y;
-    const change = Math.max(changeX, changeY);
+  if (interaction.type === "resize-width") {
+  const pointer = pointerToPercent(event);
+  const deltaX = pointer.x - interaction.pointerStart.x;
 
-    treatmentArea.width = clamp(interaction.startWidth + change, 12, 80);
+  area.width = Math.max(
+    4,
+    Math.min(100 - area.x, interaction.startWidth + deltaX)
+  );
+}
 
-    const ratio = interaction.startHeight / interaction.startWidth;
+if (interaction.type === "resize-height") {
+  const pointer = pointerToPercent(event);
+  const deltaY = pointer.y - interaction.pointerStart.y;
 
-    treatmentArea.height = clamp(
-      treatmentArea.width * ratio,
-      10,
-      70
-    );
+  area.height = Math.max(
+    4,
+    Math.min(100 - area.y, interaction.startHeight + deltaY)
+  );
+}
 
-    treatmentArea.width = Math.min(
-      treatmentArea.width,
-      100 - treatmentArea.x
-    );
+if (interaction.type === "resize-both") {
+  const pointer = pointerToPercent(event);
+  const deltaX = pointer.x - interaction.pointerStart.x;
+  const deltaY = pointer.y - interaction.pointerStart.y;
 
-    treatmentArea.height = Math.min(
-      treatmentArea.height,
-      100 - treatmentArea.y
-    );
-  }
+  area.width = Math.max(
+    4,
+    Math.min(100 - area.x, interaction.startWidth + deltaX)
+  );
+
+  area.height = Math.max(
+    4,
+    Math.min(100 - area.y, interaction.startHeight + deltaY)
+  );
+}
 
   updateSimulation();
 });
 
 document.addEventListener("pointerup", (event) => {
-  if (!interaction || event.pointerId !== interaction.pointerId) {
-    return;
+  if (interaction && event.pointerId === interaction.pointerId) {
+    interaction = null;
   }
-
-  interaction = null;
 });
 
 areaButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    selectArea(button);
+    selectAreaPreset(button);
   });
 });
 
-intensity.addEventListener("input", updateSimulation);
+addAreaButton.addEventListener("click", () => {
+  if (!isPreviewing) {
+    createTreatmentArea();
+  }
+});
 
-resetButton.addEventListener("click", () => {
-  intensity.value = "0";
-  selectArea(areaButtons[0]);
+deleteAreaButton.addEventListener("click", deleteSelectedTreatmentArea);
+
+previewResultButton.addEventListener("click", () => {
+  setPreviewMode(true);
+});
+
+previewResultButton.addEventListener("pointerdown", (event) => {
+  if (!isPreviewing) {
+    return;
+  }
+
+  event.preventDefault();
+  previewResultButton.setPointerCapture(event.pointerId);
+  showBeforeImage();
+});
+
+previewResultButton.addEventListener("pointerup", () => {
+  showAfterImage();
+});
+
+previewResultButton.addEventListener("pointercancel", () => {
+  showAfterImage();
+});
+
+previewResultButton.addEventListener("lostpointercapture", () => {
+  showAfterImage();
+});
+
+previewResultButton.addEventListener("keydown", (event) => {
+  if (
+    isPreviewing &&
+    (event.key === " " || event.key === "Enter") &&
+    !event.repeat
+  ) {
+    event.preventDefault();
+    showBeforeImage();
+  }
+});
+
+previewResultButton.addEventListener("keyup", (event) => {
+  if (event.key === " " || event.key === "Enter") {
+    showAfterImage();
+  }
+});
+editResultButton.addEventListener("click", () => {
+  setPreviewMode(false);
+});
+
+downloadResultButton.addEventListener("click", downloadEditedImage);
+
+intensity.addEventListener("input", () => {
+  const area = getSelectedTreatmentArea();
+
+  if (!area || isPreviewing) {
+    return;
+  }
+
+  area.intensity = Number(intensity.value);
   updateSimulation();
 });
 
-photoUpload.addEventListener("change", (event) => {
-  const file = event.target.files && event.target.files[0];
+resetButton.addEventListener("click", () => {
+  if (isPreviewing) {
+    return;
+  }
 
-  if (!file) {
+  treatmentAreas = [];
+  selectedAreaId = null;
+  nextAreaId = 1;
+
+  areaButtons.forEach((button, index) => {
+    const isForehead = index === 0;
+
+    button.classList.toggle("active", isForehead);
+    button.setAttribute("aria-pressed", String(isForehead));
+  });
+
+  selectedArea.textContent = "Selected area: Forehead";
+  areaDescription.textContent =
+    "Forehead: this visual demo highlights a common facial expression area.";
+
+  createTreatmentArea({ x: 27, y: 18, width: 46, height: 28 });
+});
+
+photoUpload.addEventListener("change", (event) => {
+  const file = event.target.files?.[0];
+
+  if (!file || isPreviewing) {
     return;
   }
 
@@ -315,23 +555,23 @@ photoUpload.addEventListener("change", (event) => {
     URL.revokeObjectURL(selectedPhotoUrl);
   }
 
-  const newPhotoUrl = URL.createObjectURL(file);
+  const imageUrl = URL.createObjectURL(file);
 
   faceImage.onload = () => {
-    selectedPhotoUrl = newPhotoUrl;
+    selectedPhotoUrl = imageUrl;
+    photoStatus.textContent = `Showing your photo: ${file.name}`;
     updateSimulation();
   };
 
   faceImage.onerror = () => {
     photoStatus.textContent = "The selected image could not be loaded.";
-    URL.revokeObjectURL(newPhotoUrl);
+    URL.revokeObjectURL(imageUrl);
   };
 
-  faceImage.src = newPhotoUrl;
+  faceImage.src = imageUrl;
   faceImage.alt = `Selected photo: ${file.name}`;
-  photoStatus.textContent = `Showing your photo: ${file.name}`;
 });
 
 window.addEventListener("resize", updateSimulation);
 
-updateSimulation();
+resetButton.click();

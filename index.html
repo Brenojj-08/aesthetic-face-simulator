@@ -88,10 +88,26 @@
 </div>
     <h2>Visual preview level</h2>
 
-    <label for="intensity">Subtle ↔ Enhanced</label>
-    <br>
-    <input id="intensity" type="range" min="0" max="100" value="0">
-   <p id="intensity-value">Simulation intensity: 0%</p>
+<div class="area-actions">
+  <button id="add-area-button" type="button">Add treatment area</button>
+  <button id="delete-area-button" type="button">Delete selected area</button>
+  <button id="preview-result-button" type="button">Preview clean result</button>
+  <button id="edit-result-button" type="button" hidden>Back to editing</button>
+  <button id="download-result-button" type="button">Download edited image</button>
+</div>
+<p class="canvas-help">
+  Arraste a área para reposicionar. Use a bolinha no canto para redimensionar.
+</p>
+
+<label for="intensity">Selected area: Subtle ↔ Enhanced</label>
+<br>
+<input id="intensity" type="range" min="0" max="100" value="0">
+
+<p id="intensity-value">Selected area intensity: 0%</p>
+
+<p class="simulation-note">
+  Select an oval, then move or resize it. Add more areas for different parts of the photo.
+</p>
 
 <label for="photo-upload">Choose a photo</label>
 <br>
