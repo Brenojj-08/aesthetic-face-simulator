@@ -178,7 +178,8 @@ strong {
 #reset-button:focus-visible {
   outline: 3px solid rgba(59, 130, 246, 0.45);
   outline-offset: 2px;
-}            
+}       
+     
 @media (max-width: 600px) {
   main {
     width: min(92%, 720px);
@@ -198,4 +199,22 @@ strong {
   .face-container {
     width: min(100%, 300px);
   }
+}
+.how-it-works {
+  margin: 24px 0;
+  padding: 18px 20px;
+  background: #fff4f8;
+  border-left: 4px solid #8d3c68;
+  border-radius: 10px;
+}
+
+.how-it-works h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.how-it-works ol {
+  margin: 12px 0 0;
+  padding-left: 22px;
+  line-height: 1.6;
 }

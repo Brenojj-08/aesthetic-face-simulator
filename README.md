@@ -9,6 +9,8 @@ An educational visual simulator for facial aesthetics concepts.
 - Reset simulation button
 - Interactive visual feedback
 - Accessible selection state with `aria-pressed`
+- Responsive layout for mobile screens
+- “How it works” section with usage instructions
 
 ## Technologies
 
