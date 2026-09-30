@@ -8,7 +8,7 @@ Um simulador visual educacional para explorar, de forma interativa, conceitos de
 
 Acesse a versão publicada:
 
-**[Abrir o simulador](https://github.com/Brenojj-08/aesthetic-face-simulator)**
+**[Abrir o simulador](https://brenojj-08.github.io/aesthetic-face-simulator/)**
 
 ## Funcionalidades
 
