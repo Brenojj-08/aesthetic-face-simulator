@@ -24,6 +24,16 @@ const textureValue = document.getElementById("texture-value");
 const textureOutput = document.getElementById("texture-output");
 const smoothingPresetButtons = document.querySelectorAll(".smoothing-preset");
 
+const brightness = document.getElementById("brightness");
+const contrast = document.getElementById("contrast");
+const saturation = document.getElementById("saturation");
+const brightnessOutput = document.getElementById("brightness-output");
+const contrastOutput = document.getElementById("contrast-output");
+const saturationOutput = document.getElementById("saturation-output");
+const resetPhotoAdjustmentsButton = document.getElementById(
+  "reset-photo-adjustments-button"
+);
+
 const photoUpload = document.getElementById("photo-upload");
 const photoStatus = document.getElementById("photo-status");
 const faceImage = document.getElementById("face-image");
@@ -39,7 +49,7 @@ const comparisonDivider = document.getElementById("comparison-divider");
 const comparisonControl = document.getElementById("comparison-control");
 const comparisonRange = document.getElementById("comparison-range");
 
-const STORAGE_KEY = "visualiza-simulator-settings-v2";
+const STORAGE_KEY = "visualiza-simulator-settings-v3";
 
 const areaDescriptions = {
   Forehead: "Testa: cria uma nova área ajustável próxima à testa.",
@@ -62,6 +72,12 @@ let treatmentAreas = [];
 let history = [];
 let historyIndex = -1;
 
+let photoAdjustments = {
+  brightness: 0,
+  contrast: 0,
+  saturation: 0
+};
+
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
 }
@@ -70,19 +86,36 @@ function cloneAreas(areas) {
   return areas.map((area) => ({ ...area }));
 }
 
+function cloneAdjustments(adjustments) {
+  return {
+    brightness: adjustments.brightness,
+    contrast: adjustments.contrast,
+    saturation: adjustments.saturation
+  };
+}
+
 function createSnapshot() {
   return {
     treatmentAreas: cloneAreas(treatmentAreas),
     selectedAreaId,
-    nextAreaId
+    nextAreaId,
+    photoAdjustments: cloneAdjustments(photoAdjustments)
   };
 }
 
 function normalizeArea(area) {
   return {
     ...area,
-    intensity: Number(area.intensity ?? 0),
-    texture: Number(area.texture ?? 65)
+    intensity: Number(area.intensity ?? 55),
+    texture: Number(area.texture ?? 68)
+  };
+}
+
+function normalizeAdjustments(adjustments = {}) {
+  return {
+    brightness: clamp(Number(adjustments.brightness ?? 0), -40, 40),
+    contrast: clamp(Number(adjustments.contrast ?? 0), -40, 40),
+    saturation: clamp(Number(adjustments.saturation ?? 0), -40, 40)
   };
 }
 
@@ -91,6 +124,7 @@ function persistSettings() {
     treatmentAreas,
     selectedAreaId,
     nextAreaId,
+    photoAdjustments,
     comparisonPosition: comparisonRange.value
   };
 
@@ -108,6 +142,7 @@ function restorePersistedSettings() {
     treatmentAreas = saved.treatmentAreas.map(normalizeArea);
     selectedAreaId = saved.selectedAreaId;
     nextAreaId = saved.nextAreaId || treatmentAreas.length + 1;
+    photoAdjustments = normalizeAdjustments(saved.photoAdjustments);
     comparisonRange.value = saved.comparisonPosition || "50";
 
     return treatmentAreas.length > 0;
@@ -145,6 +180,7 @@ function restoreSnapshot(snapshot) {
   treatmentAreas = cloneAreas(snapshot.treatmentAreas).map(normalizeArea);
   selectedAreaId = snapshot.selectedAreaId;
   nextAreaId = snapshot.nextAreaId;
+  photoAdjustments = normalizeAdjustments(snapshot.photoAdjustments);
 
   updateSimulation();
 }
@@ -184,6 +220,45 @@ function pointerToPercent(event) {
   };
 }
 
+function getPhotoFilter() {
+  const brightnessValue = 100 + photoAdjustments.brightness;
+  const contrastValue = 100 + photoAdjustments.contrast;
+  const saturationValue = 100 + photoAdjustments.saturation;
+
+  return `brightness(${brightnessValue}%) contrast(${contrastValue}%) saturate(${saturationValue}%)`;
+}
+
+function drawBaseImage(context, width, height) {
+  context.save();
+  context.filter = getPhotoFilter();
+
+  context.drawImage(
+    faceImage,
+    0,
+    0,
+    faceImage.naturalWidth,
+    faceImage.naturalHeight,
+    0,
+    0,
+    width,
+    height
+  );
+
+  context.restore();
+}
+
+function createAdjustedImageCanvas(width, height) {
+  const baseCanvas = document.createElement("canvas");
+  const baseContext = baseCanvas.getContext("2d");
+
+  baseCanvas.width = width;
+  baseCanvas.height = height;
+
+  drawBaseImage(baseContext, width, height);
+
+  return baseCanvas;
+}
+
 function createTreatmentArea(config = {}, recordHistory = true) {
   const area = {
     id: nextAreaId,
@@ -192,7 +267,7 @@ function createTreatmentArea(config = {}, recordHistory = true) {
     width: config.width ?? 40,
     height: config.height ?? 24,
     intensity: config.intensity ?? 55,
-texture: config.texture ?? 68
+    texture: config.texture ?? 68
   };
 
   nextAreaId += 1;
@@ -327,33 +402,9 @@ function renderTreatmentAreas() {
   });
 }
 
-function drawSoftMask(context, centerX, centerY, radiusX, radiusY) {
-  const gradient = context.createRadialGradient(
-    centerX,
-    centerY,
-    Math.min(radiusX, radiusY) * 0.42,
-    centerX,
-    centerY,
-    Math.max(radiusX, radiusY)
-  );
+function drawSmoothingOn(context, width, height, adjustedBaseCanvas) {
+  const baseCanvas = adjustedBaseCanvas || createAdjustedImageCanvas(width, height);
 
-  gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
-  gradient.addColorStop(0.65, "rgba(255, 255, 255, 0.92)");
-  gradient.addColorStop(0.86, "rgba(255, 255, 255, 0.35)");
-  gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-
-  context.save();
-  context.translate(centerX, centerY);
-  context.scale(1, radiusY / radiusX);
-  context.beginPath();
-  context.arc(0, 0, radiusX, 0, Math.PI * 2);
-  context.closePath();
-  context.fillStyle = gradient;
-  context.fill();
-  context.restore();
-}
-
-function drawSmoothingOn(context, width, height) {
   treatmentAreas.forEach((area) => {
     if (area.intensity === 0) {
       return;
@@ -367,14 +418,10 @@ function drawSmoothingOn(context, width, height) {
     const smoothStrength = area.intensity / 100;
     const textureRetention = area.texture / 100;
 
-    /*
-      Mais intensidade = mais blur e mais opacidade.
-      Mais textura = menos opacidade, mas sem anular o efeito.
-    */
     const blurAmount = 0.8 + smoothStrength * 5.2;
-const effectOpacity =
-  (0.10 + smoothStrength * 0.30) *
-  (1 - textureRetention * 0.42);
+    const effectOpacity =
+      (0.1 + smoothStrength * 0.3) *
+      (1 - textureRetention * 0.42);
 
     const effectCanvas = document.createElement("canvas");
     const effectContext = effectCanvas.getContext("2d");
@@ -384,19 +431,7 @@ const effectOpacity =
 
     effectContext.save();
     effectContext.filter = `blur(${blurAmount}px)`;
-
-    effectContext.drawImage(
-      faceImage,
-      0,
-      0,
-      faceImage.naturalWidth,
-      faceImage.naturalHeight,
-      0,
-      0,
-      width,
-      height
-    );
-
+    effectContext.drawImage(baseCanvas, 0, 0, width, height);
     effectContext.restore();
 
     const maskCanvas = document.createElement("canvas");
@@ -441,6 +476,14 @@ const effectOpacity =
   });
 }
 
+function drawEditedImage(context, width, height) {
+  const adjustedBaseCanvas = createAdjustedImageCanvas(width, height);
+
+  context.clearRect(0, 0, width, height);
+  context.drawImage(adjustedBaseCanvas, 0, 0, width, height);
+  drawSmoothingOn(context, width, height, adjustedBaseCanvas);
+}
+
 function drawCanvas(targetCanvas, targetContext) {
   if (!faceImage.complete || !faceImage.naturalWidth) {
     return;
@@ -456,8 +499,7 @@ function drawCanvas(targetCanvas, targetContext) {
   targetCanvas.width = width;
   targetCanvas.height = height;
 
-  targetContext.clearRect(0, 0, width, height);
-  drawSmoothingOn(targetContext, width, height);
+  drawEditedImage(targetContext, width, height);
 }
 
 function drawSmoothing() {
@@ -491,11 +533,22 @@ function updatePresetButtons(area) {
   });
 }
 
+function updatePhotoAdjustmentControls() {
+  brightness.value = String(photoAdjustments.brightness);
+  contrast.value = String(photoAdjustments.contrast);
+  saturation.value = String(photoAdjustments.saturation);
+
+  brightnessOutput.textContent = `${photoAdjustments.brightness > 0 ? "+" : ""}${photoAdjustments.brightness}`;
+  contrastOutput.textContent = `${photoAdjustments.contrast > 0 ? "+" : ""}${photoAdjustments.contrast}`;
+  saturationOutput.textContent = `${photoAdjustments.saturation > 0 ? "+" : ""}${photoAdjustments.saturation}`;
+}
+
 function updateSimulation() {
   const area = getSelectedTreatmentArea();
 
   renderTreatmentAreas();
   drawSmoothing();
+  updatePhotoAdjustmentControls();
 
   const hasArea = Boolean(area);
 
@@ -508,6 +561,11 @@ function updateSimulation() {
   smoothingPresetButtons.forEach((button) => {
     button.disabled = !hasArea || isPreviewing;
   });
+
+  brightness.disabled = isPreviewing;
+  contrast.disabled = isPreviewing;
+  saturation.disabled = isPreviewing;
+  resetPhotoAdjustmentsButton.disabled = isPreviewing;
 
   if (!area) {
     intensity.value = "0";
@@ -543,6 +601,10 @@ function setEditorDisabled(disabled) {
   clearAreasButton.disabled = disabled || !treatmentAreas.length;
   intensity.disabled = disabled || !getSelectedTreatmentArea();
   texture.disabled = disabled || !getSelectedTreatmentArea();
+  brightness.disabled = disabled;
+  contrast.disabled = disabled;
+  saturation.disabled = disabled;
+  resetPhotoAdjustmentsButton.disabled = disabled;
   photoUpload.disabled = disabled;
   resetButton.disabled = disabled;
 
@@ -614,15 +676,7 @@ function downloadEditedImage() {
   exportCanvas.width = faceImage.naturalWidth;
   exportCanvas.height = faceImage.naturalHeight;
 
-  exportContext.drawImage(
-    faceImage,
-    0,
-    0,
-    exportCanvas.width,
-    exportCanvas.height
-  );
-
-  drawSmoothingOn(
+  drawEditedImage(
     exportContext,
     exportCanvas.width,
     exportCanvas.height
@@ -727,6 +781,30 @@ function resetToDefault() {
 
   updateSimulation();
   saveHistory();
+}
+
+function resetPhotoAdjustments() {
+  if (isPreviewing) {
+    return;
+  }
+
+  photoAdjustments = {
+    brightness: 0,
+    contrast: 0,
+    saturation: 0
+  };
+
+  updateSimulation();
+  saveHistory();
+}
+
+function updatePhotoAdjustment(name, value) {
+  if (isPreviewing) {
+    return;
+  }
+
+  photoAdjustments[name] = Number(value);
+  updateSimulation();
 }
 
 document.addEventListener("pointermove", (event) => {
@@ -841,6 +919,29 @@ texture.addEventListener("input", () => {
 
 texture.addEventListener("change", saveHistory);
 
+brightness.addEventListener("input", () => {
+  updatePhotoAdjustment("brightness", brightness.value);
+});
+
+brightness.addEventListener("change", saveHistory);
+
+contrast.addEventListener("input", () => {
+  updatePhotoAdjustment("contrast", contrast.value);
+});
+
+contrast.addEventListener("change", saveHistory);
+
+saturation.addEventListener("input", () => {
+  updatePhotoAdjustment("saturation", saturation.value);
+});
+
+saturation.addEventListener("change", saveHistory);
+
+resetPhotoAdjustmentsButton.addEventListener(
+  "click",
+  resetPhotoAdjustments
+);
+
 photoUpload.addEventListener("change", (event) => {
   const file = event.target.files?.[0];
 
@@ -887,6 +988,9 @@ document.addEventListener("keydown", (event) => {
     isTyping &&
     target !== intensity &&
     target !== texture &&
+    target !== brightness &&
+    target !== contrast &&
+    target !== saturation &&
     target !== comparisonRange
   ) {
     return;
