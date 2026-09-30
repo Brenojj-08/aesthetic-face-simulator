@@ -2,6 +2,8 @@
 
 Um simulador visual educacional para explorar, de forma interativa, conceitos de estética facial em uma imagem.
 
+> Este é meu primeiro projeto prático de desenvolvimento web, criado como parte do meu processo de aprendizado com HTML, CSS, JavaScript, Git e GitHub Pages.
+
 > Projeto demonstrativo: não oferece aconselhamento médico, recomendações de tratamento, orientação sobre injeções ou garantia de resultados clínicos.
 
 ## Demonstração
