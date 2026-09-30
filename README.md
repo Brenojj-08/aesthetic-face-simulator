@@ -8,6 +8,8 @@ Um simulador visual educacional para explorar, de forma interativa, conceitos de
 
 ## Demonstração
 
+![Prévia do Simulador de Estética Facial](assets/preview.png)
+
 Acesse a versão publicada:
 
 **[Abrir o simulador](https://brenojj-08.github.io/aesthetic-face-simulator/)**
