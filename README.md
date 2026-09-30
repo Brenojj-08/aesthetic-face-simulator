@@ -76,10 +76,23 @@ Acesse a versão publicada:
 - As áreas podem ser movidas e redimensionadas livremente.
 - A imagem enviada pelo usuário é processada localmente durante a sessão.
 
-## Aviso
-
-Este projeto é exclusivamente educacional. Ele não oferece aconselhamento médico, diagnóstico, recomendação de tratamento, orientação clínica ou garantia de resultados.
 
 ## Autor
 
 Desenvolvido como projeto de interface web interativa.
+
+## Sobre o projeto
+
+O Simulador é meu primeiro projeto e é uma ferramenta educacional de visualização
+local desenvolvida com HTML, CSS, JavaScript e Canvas API. 
+
+A aplicação permite adicionar, mover e redimensionar áreas sobre uma imagem,
+ajustar a intensidade da prévia, comparar visualmente o antes e depois e
+exportar a imagem resultante em PNG, a ideia é auxiliar a fazer edições sútis 
+para reduzir marcas de expressão no rosto e edições minimalistas na imagem.
+
+As imagens são processadas localmente no navegador nesta versão. A integração
+com IA generativa está planejada como uma evolução futura do projeto.
+
+> Aviso: esta aplicação é exclusivamente educacional e não oferece diagnóstico,
+> recomendação de tratamento, orientação médica ou garantia de resultados.
