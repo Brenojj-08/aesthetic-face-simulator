@@ -23,6 +23,7 @@ const texture = document.getElementById("texture");
 const textureValue = document.getElementById("texture-value");
 const textureOutput = document.getElementById("texture-output");
 const smoothingPresetButtons = document.querySelectorAll(".smoothing-preset");
+const photoPresetButtons = document.querySelectorAll(".photo-preset");
 
 const brightness = document.getElementById("brightness");
 const contrast = document.getElementById("contrast");
@@ -524,12 +525,12 @@ function updateComparisonPosition(shouldPersist = true) {
 
 function updatePresetButtons(area) {
   smoothingPresetButtons.forEach((button) => {
-    const matchesPreset =
+    const isActive =
       area &&
       Number(button.dataset.intensity) === area.intensity &&
       Number(button.dataset.texture) === area.texture;
 
-    button.classList.toggle("active", matchesPreset);
+    button.classList.toggle("active", Boolean(isActive));
   });
 }
 
@@ -768,16 +769,16 @@ function resetToDefault() {
     "Testa: cria uma nova área ajustável próxima à testa.";
 
   createTreatmentArea(
-    {
-      x: 27,
-      y: 18,
-      width: 46,
-      height: 28,
-      intensity: 55,
-      texture: 68
-    },
-    false
-  );
+  {
+    x: 27,
+    y: 18,
+    width: 46,
+    height: 28,
+    intensity: 0,
+    texture: 100
+  },
+  false
+);
 
   updateSimulation();
   saveHistory();
@@ -804,6 +805,11 @@ function updatePhotoAdjustment(name, value) {
   }
 
   photoAdjustments[name] = Number(value);
+
+  photoPresetButtons.forEach((button) => {
+    button.classList.remove("active");
+  });
+
   updateSimulation();
 }
 
@@ -942,6 +948,25 @@ resetPhotoAdjustmentsButton.addEventListener(
   resetPhotoAdjustments
 );
 
+photoPresetButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    if (isPreviewing) {
+      return;
+    }
+
+    photoAdjustments.brightness = Number(button.dataset.brightness);
+    photoAdjustments.contrast = Number(button.dataset.contrast);
+    photoAdjustments.saturation = Number(button.dataset.saturation);
+
+    photoPresetButtons.forEach((presetButton) => {
+      presetButton.classList.toggle("active", presetButton === button);
+    });
+
+    updateSimulation();
+    saveHistory();
+  });
+});;
+
 photoUpload.addEventListener("change", (event) => {
   const file = event.target.files?.[0];
 
@@ -962,10 +987,27 @@ photoUpload.addEventListener("change", (event) => {
   const imageUrl = URL.createObjectURL(file);
 
   faceImage.onload = () => {
-    selectedPhotoUrl = imageUrl;
-    photoStatus.textContent = `Exibindo sua foto: ${file.name}`;
-    updateSimulation();
+  selectedPhotoUrl = imageUrl;
+
+  photoAdjustments = {
+    brightness: 0,
+    contrast: 0,
+    saturation: 0
+    
   };
+
+    treatmentAreas = [];
+  selectedAreaId = null;
+  nextAreaId = 1;
+
+  photoPresetButtons.forEach((button) => {
+    button.classList.remove("active");
+  });
+
+  photoStatus.textContent = `Exibindo sua foto: ${file.name}`;
+  updateSimulation();
+  saveHistory();
+};
 
   faceImage.onerror = () => {
     photoStatus.textContent = "Não foi possível carregar a imagem selecionada.";
@@ -1031,11 +1073,16 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
-const restored = restorePersistedSettings();
+localStorage.removeItem(STORAGE_KEY);
 
-if (restored) {
-  updateSimulation();
-  saveHistory();
-} else {
-  resetToDefault();
-}
+photoAdjustments = {
+  brightness: 0,
+  contrast: 0,
+  saturation: 0
+};
+
+treatmentAreas = [];
+selectedAreaId = null;
+nextAreaId = 1;
+
+resetToDefault();
