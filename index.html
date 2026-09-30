@@ -143,17 +143,34 @@
         <p id="intensity-value">Intensidade da área selecionada: 0%</p>
       </div>
 
-      <div class="result-actions">
-        <button id="generate-preview-button" class="primary-result-button" type="button">
-          Gerar visualização local
-        </button>
-        <button id="edit-result-button" type="button" hidden>
-          Voltar à edição
-        </button>
-        <button id="download-result-button" class="download-button" type="button">
-          Baixar imagem em PNG
-        </button>
-      </div>
+ <div class="result-actions">
+  <button id="generate-preview-button" class="primary-result-button" type="button">
+    Gerar visualização local
+  </button>
+
+  <button
+  id="generate-ai-button"
+  class="ai-button"
+  type="button"
+  disabled
+  title="Integração com IA generativa em desenvolvimento"
+>
+  Visualização com IA — em breve
+</button>
+
+  <button id="edit-result-button" type="button" hidden>
+    Voltar à edição
+  </button>
+
+  <button id="download-result-button" class="download-button" type="button">
+    Baixar imagem em PNG
+  </button>
+</div>
+
+<p class="ai-future-note">
+  A integração com IA generativa está em desenvolvimento. Nesta versão, a
+  visualização é processada localmente no seu navegador.
+</p>
 
       <p id="generation-status" class="generation-status" aria-live="polite"></p>
     </section>

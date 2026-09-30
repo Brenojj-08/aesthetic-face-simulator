@@ -1,4 +1,4 @@
-const areaButtons = document.querySelectorAll(".area-button");
+ const areaButtons = document.querySelectorAll(".area-button");
 const selectedArea = document.getElementById("selected-area");
 const areaDescription = document.getElementById("area-description");
 
@@ -56,7 +56,6 @@ let isPreviewing = false;
 let treatmentAreas = [];
 let history = [];
 let historyIndex = -1;
-let shouldSaveHistory = true;
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
@@ -72,64 +71,6 @@ function createSnapshot() {
     selectedAreaId,
     nextAreaId
   };
-}
-
-function restoreSnapshot(snapshot) {
-  treatmentAreas = cloneAreas(snapshot.treatmentAreas);
-  selectedAreaId = snapshot.selectedAreaId;
-  nextAreaId = snapshot.nextAreaId;
-  updateSimulation();
-}
-
-function saveHistory() {
-  if (!shouldSaveHistory) {
-    return;
-  }
-
-  const snapshot = createSnapshot();
-  const lastSnapshot = history[historyIndex];
-
-  if (JSON.stringify(snapshot) === JSON.stringify(lastSnapshot)) {
-    return;
-  }
-
-  history = history.slice(0, historyIndex + 1);
-  history.push(snapshot);
-
-  if (history.length > 40) {
-    history.shift();
-  }
-
-  historyIndex = history.length - 1;
-  updateHistoryButtons();
-  persistSettings();
-}
-
-function updateHistoryButtons() {
-  undoButton.disabled = isPreviewing || historyIndex <= 0;
-  redoButton.disabled = isPreviewing || historyIndex >= history.length - 1;
-}
-
-function undo() {
-  if (isPreviewing || historyIndex <= 0) {
-    return;
-  }
-
-  historyIndex -= 1;
-  restoreSnapshot(history[historyIndex]);
-  updateHistoryButtons();
-  persistSettings();
-}
-
-function redo() {
-  if (isPreviewing || historyIndex >= history.length - 1) {
-    return;
-  }
-
-  historyIndex += 1;
-  restoreSnapshot(history[historyIndex]);
-  updateHistoryButtons();
-  persistSettings();
 }
 
 function persistSettings() {
@@ -155,10 +96,66 @@ function restorePersistedSettings() {
     selectedAreaId = saved.selectedAreaId;
     nextAreaId = saved.nextAreaId || treatmentAreas.length + 1;
     comparisonRange.value = saved.comparisonPosition || "50";
+
     return treatmentAreas.length > 0;
   } catch {
     return false;
   }
+}
+
+function updateHistoryButtons() {
+  undoButton.disabled = isPreviewing || historyIndex <= 0;
+  redoButton.disabled = isPreviewing || historyIndex >= history.length - 1;
+}
+
+function saveHistory() {
+  const snapshot = createSnapshot();
+  const lastSnapshot = history[historyIndex];
+
+  if (JSON.stringify(snapshot) === JSON.stringify(lastSnapshot)) {
+    return;
+  }
+
+  history = history.slice(0, historyIndex + 1);
+  history.push(snapshot);
+
+  if (history.length > 40) {
+    history.shift();
+  }
+
+  historyIndex = history.length - 1;
+  updateHistoryButtons();
+  persistSettings();
+}
+
+function restoreSnapshot(snapshot) {
+  treatmentAreas = cloneAreas(snapshot.treatmentAreas);
+  selectedAreaId = snapshot.selectedAreaId;
+  nextAreaId = snapshot.nextAreaId;
+
+  updateSimulation();
+}
+
+function undo() {
+  if (isPreviewing || historyIndex <= 0) {
+    return;
+  }
+
+  historyIndex -= 1;
+  restoreSnapshot(history[historyIndex]);
+  updateHistoryButtons();
+  persistSettings();
+}
+
+function redo() {
+  if (isPreviewing || historyIndex >= history.length - 1) {
+    return;
+  }
+
+  historyIndex += 1;
+  restoreSnapshot(history[historyIndex]);
+  updateHistoryButtons();
+  persistSettings();
 }
 
 function getSelectedTreatmentArea() {
@@ -187,6 +184,7 @@ function createTreatmentArea(config = {}, recordHistory = true) {
   nextAreaId += 1;
   treatmentAreas.push(area);
   selectedAreaId = area.id;
+
   updateSimulation();
 
   if (recordHistory) {
@@ -200,6 +198,7 @@ function deleteSelectedTreatmentArea() {
   }
 
   treatmentAreas = treatmentAreas.filter((area) => area.id !== selectedAreaId);
+
   selectedAreaId = treatmentAreas.length
     ? treatmentAreas[treatmentAreas.length - 1].id
     : null;
@@ -231,6 +230,7 @@ function clearAreas() {
 
   treatmentAreas = [];
   selectedAreaId = null;
+
   updateSimulation();
   saveHistory();
 }
@@ -246,6 +246,7 @@ function renderTreatmentAreas() {
 
   treatmentAreas.forEach((area) => {
     const element = document.createElement("div");
+
     element.className = "treatment-area";
 
     if (area.id === selectedAreaId) {
@@ -261,7 +262,7 @@ function renderTreatmentAreas() {
       <button
         class="resize-handle resize-handle-both"
         type="button"
-        aria-label="Redimensionar área de tratamento"
+        aria-label="Redimensionar área de visualização"
       ></button>
     `;
 
@@ -371,6 +372,7 @@ function drawCanvas(targetCanvas, targetContext) {
 
   targetCanvas.width = width;
   targetCanvas.height = height;
+
   targetContext.clearRect(0, 0, width, height);
   drawSmoothingOn(targetContext, width, height);
 }
@@ -380,17 +382,19 @@ function drawSmoothing() {
 
   if (isPreviewing) {
     drawCanvas(comparisonCanvas, comparisonContext);
-    updateComparisonPosition();
+    updateComparisonPosition(false);
   }
 }
 
-function updateComparisonPosition() {
+function updateComparisonPosition(shouldPersist = true) {
   const position = Number(comparisonRange.value);
 
   comparisonMask.style.clipPath = `inset(0 ${100 - position}% 0 0)`;
   comparisonDivider.style.left = `${position}%`;
 
-  persistSettings();
+  if (shouldPersist) {
+    persistSettings();
+  }
 }
 
 function updateSimulation() {
@@ -448,7 +452,6 @@ function setPreviewMode(previewing) {
   editResultButton.hidden = !previewing;
 
   smoothingCanvas.style.opacity = previewing ? "0" : "1";
-
   comparisonMask.hidden = !previewing;
   comparisonDivider.hidden = !previewing;
 
@@ -475,11 +478,12 @@ async function generateLocalPreview() {
   generatePreviewButton.disabled = true;
   generatePreviewButton.textContent = "Gerando visualização...";
   generationStatus.textContent =
-    "Processando localmente no seu dispositivo. Nenhuma imagem foi enviada.";
+    "Processando a visualização localmente no seu dispositivo...";
 
-  await new Promise((resolve) => window.setTimeout(resolve, 500));
+  await new Promise((resolve) => window.setTimeout(resolve, 350));
 
   setPreviewMode(true);
+
   generatePreviewButton.disabled = false;
   generatePreviewButton.textContent = "Gerar visualização local";
 }
@@ -537,6 +541,7 @@ function selectAreaPreset(button) {
 
   areaButtons.forEach((areaButton) => {
     const isSelected = areaButton === button;
+
     areaButton.classList.toggle("active", isSelected);
     areaButton.setAttribute("aria-pressed", String(isSelected));
   });
@@ -569,6 +574,7 @@ function resetToDefault() {
 
   areaButtons.forEach((button, index) => {
     const isForehead = index === 0;
+
     button.classList.toggle("active", isForehead);
     button.setAttribute("aria-pressed", String(isForehead));
   });
@@ -578,6 +584,7 @@ function resetToDefault() {
     "Testa: cria uma nova área ajustável próxima à testa.";
 
   createTreatmentArea({ x: 27, y: 18, width: 46, height: 28 }, false);
+
   updateSimulation();
   saveHistory();
 }
@@ -644,10 +651,13 @@ undoButton.addEventListener("click", undo);
 redoButton.addEventListener("click", redo);
 
 generatePreviewButton.addEventListener("click", generateLocalPreview);
+
 editResultButton.addEventListener("click", () => setPreviewMode(false));
 downloadResultButton.addEventListener("click", downloadEditedImage);
 
-comparisonRange.addEventListener("input", updateComparisonPosition);
+comparisonRange.addEventListener("input", () => {
+  updateComparisonPosition();
+});
 
 intensity.addEventListener("input", () => {
   const area = getSelectedTreatmentArea();
@@ -658,6 +668,7 @@ intensity.addEventListener("input", () => {
 
   area.intensity = Number(intensity.value);
   intensityOutput.textContent = `${area.intensity}%`;
+
   updateSimulation();
 });
 
@@ -699,6 +710,7 @@ photoUpload.addEventListener("change", (event) => {
 
 document.addEventListener("keydown", (event) => {
   const target = event.target;
+
   const isTyping =
     target instanceof HTMLInputElement ||
     target instanceof HTMLTextAreaElement ||
