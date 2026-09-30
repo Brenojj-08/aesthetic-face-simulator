@@ -49,7 +49,7 @@ Acesse a versão publicada:
 1. Clone ou baixe este repositório:
 
    ```bash
-   git clone https://github.com/Brenojj-08/aesthetic-face-simulator/tree/main
+   git clone [https://github.com/Brenojj-08/aesthetic-face-simulator/tree/main](https://github.com/Brenojj-08/aesthetic-face-simulator.git)
    ```
 
 2. Abra a pasta do projeto no Visual Studio Code.
