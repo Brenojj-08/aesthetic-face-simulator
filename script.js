@@ -21,9 +21,9 @@ const smoothingCanvas = document.getElementById("smoothing-canvas");
 const smoothingContext = smoothingCanvas.getContext("2d");
 
 const areaDescriptions = {
-  Forehead: "Forehead: creates a new adjustable area near the forehead.",
-  Glabella: "Glabella: creates a new adjustable area between the eyebrows.",
-  "Eye Area": "Eye Area: creates a new adjustable area around the eyes."
+  Forehead: "Testa: cria uma nova área ajustável próxima à testa.",
+  Glabella: "Glabela: cria uma nova área ajustável entre as sobrancelhas.",
+  "Eye Area": "Área dos olhos: cria uma nova área ajustável ao redor dos olhos."
 };
 
 let selectedPhotoUrl = "";
@@ -261,7 +261,7 @@ function downloadEditedImage() {
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = "aesthetic-face-preview-hd.png";
+    link.download = "simulacao-estetica-facial.png";
 
     document.body.appendChild(link);
     link.click();
@@ -334,7 +334,7 @@ function updateSimulation() {
     intensity.disabled = true;
     deleteAreaButton.disabled = true;
     intensity.value = "0";
-    intensityValue.textContent = "No treatment area selected.";
+    intensityValue.textContent = "Nenhuma área de tratamento selecionada.";
     return;
   }
 
@@ -342,7 +342,8 @@ function updateSimulation() {
     intensity.disabled = false;
     deleteAreaButton.disabled = false;
     intensity.value = String(area.intensity);
-    intensityValue.textContent = `Area ${area.id} intensity: ${area.intensity}%`;
+    intensityValue.textContent =
+  `Intensidade da área ${area.id}: ${area.intensity}%`;
   }
 }
 
@@ -352,7 +353,14 @@ function selectAreaPreset(button) {
   }
 
   const areaName = button.dataset.area;
+const areaNamesInPortuguese = {
+  Forehead: "Testa",
+  Glabella: "Glabela",
+  "Eye Area": "Área dos olhos"
+};
 
+selectedArea.textContent =
+  `Área selecionada: ${areaNamesInPortuguese[areaName]}`;
   areaButtons.forEach((areaButton) => {
     const isSelected = areaButton === button;
 
@@ -360,7 +368,14 @@ function selectAreaPreset(button) {
     areaButton.setAttribute("aria-pressed", String(isSelected));
   });
 
-  selectedArea.textContent = `Preset selected: ${areaName}`;
+  const areaNamesInPortuguese = {
+  Forehead: "Testa",
+  Glabella: "Glabela",
+  "Eye Area": "Área dos olhos"
+};
+
+selectedArea.textContent =
+  `Área selecionada: ${areaNamesInPortuguese[areaName]}`;
   areaDescription.textContent = areaDescriptions[areaName];
 
   if (areaName === "Forehead") {
@@ -531,9 +546,9 @@ resetButton.addEventListener("click", () => {
     button.setAttribute("aria-pressed", String(isForehead));
   });
 
-  selectedArea.textContent = "Selected area: Forehead";
-  areaDescription.textContent =
-    "Forehead: this visual demo highlights a common facial expression area.";
+  selectedArea.textContent = "Área selecionada: Testa";
+areaDescription.textContent =
+  "Testa: esta demonstração visual destaca uma área comum de expressão facial.";
 
   createTreatmentArea({ x: 27, y: 18, width: 46, height: 28 });
 });
@@ -546,7 +561,7 @@ photoUpload.addEventListener("change", (event) => {
   }
 
   if (!file.type.startsWith("image/")) {
-    photoStatus.textContent = "Please choose a valid image file.";
+    photoStatus.textContent = "Escolha um arquivo de imagem válido.";
     photoUpload.value = "";
     return;
   }
@@ -559,17 +574,17 @@ photoUpload.addEventListener("change", (event) => {
 
   faceImage.onload = () => {
     selectedPhotoUrl = imageUrl;
-    photoStatus.textContent = `Showing your photo: ${file.name}`;
+    photoStatus.textContent = `Exibindo sua foto: ${file.name}`;
     updateSimulation();
   };
 
   faceImage.onerror = () => {
-    photoStatus.textContent = "The selected image could not be loaded.";
+   photoStatus.textContent = "Não foi possível carregar a imagem selecionada.";
     URL.revokeObjectURL(imageUrl);
   };
 
   faceImage.src = imageUrl;
-  faceImage.alt = `Selected photo: ${file.name}`;
+  faceImage.alt = `Foto selecionada: ${file.name}`;
 });
 
 window.addEventListener("resize", updateSimulation);
