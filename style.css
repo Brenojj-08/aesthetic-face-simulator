@@ -7,9 +7,9 @@ body {
 }
 
 main {
-  width: min(90%, 720px);
-  margin: 48px auto;
-  padding: 32px;
+  width: min(94%, 1400px);
+  margin: 28px auto;
+  padding: 28px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 20px;
   box-shadow: 0 12px 30px rgba(45, 36, 48, 0.12);
@@ -844,3 +844,48 @@ button:active:not(:disabled) {
     width: 100%;
   }
 }
+
+@media (min-width: 1000px) {
+  .editor-section,
+  .controls-section {
+    margin-top: 28px;
+  }
+
+  .editor-section {
+    width: 56%;
+    float: left;
+  }
+
+  .controls-section {
+    width: 40%;
+    float: right;
+  }
+
+  .upload-section,
+  .built-with,
+  .project-footer {
+    clear: both;
+  }
+
+  .face-container {
+    width: min(100%, 620px);
+    margin: 20px auto;
+  }
+}
+
+@media (max-width: 999px) {
+  .editor-section,
+  .controls-section {
+    width: auto;
+    float: none;
+  }
+}
+
+  .controls-section {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+  

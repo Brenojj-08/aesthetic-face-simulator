@@ -37,7 +37,9 @@
           <p class="section-kicker">EDITOR</p>
           <h2 id="editor-title">Áreas de visualização</h2>
         </div>
-        <p id="photo-status" aria-live="polite">Exibindo a imagem de exemplo.</p>
+        <p id="photo-status" class="photo-status">
+  Envie uma foto para começar a editar.
+</p>
       </div>
 
       <div class="preset-actions" aria-label="Áreas predefinidas">
@@ -163,8 +165,62 @@
     </p>
   </div>
 
-  <div class="smoothing-presets" aria-label="Presets de ajustes da foto">
-  <p>Presets rápidos</p>
+<div class="smoothing-presets" aria-label="Presets de suavização">
+  <p>Presets de suavização</p>
+
+  <div class="preset-buttons">
+    <button
+      class="smoothing-preset"
+      type="button"
+      data-intensity="30"
+      data-texture="85"
+    >
+      Suave
+    </button>
+
+    <button
+      class="smoothing-preset"
+      type="button"
+      data-intensity="55"
+      data-texture="68"
+    >
+      Natural
+    </button>
+
+    <button
+      class="smoothing-preset"
+      type="button"
+      data-intensity="78"
+      data-texture="42"
+    >
+      Intenso
+    </button>
+  </div>
+</div>
+
+<div class="photo-adjustments" aria-labelledby="photo-adjustments-title">
+  <div class="adjustments-heading">
+    <div>
+      <p class="section-kicker">FOTO</p>
+      <h3 id="photo-adjustments-title">Ajustes gerais</h3>
+    </div>
+    
+
+    <button
+      id="reset-photo-adjustments-button"
+      class="secondary-button compact-button"
+      type="button"
+    >
+      Restaurar ajustes
+    </button>
+  </div>
+
+  <p class="adjustments-help">
+    Estes ajustes afetam a foto inteira e também aparecem no download final.
+  </p>
+
+  <div class="smoothing-presets" aria-label="Presets de ajustes gerais">
+  <p>Presets de foto</p>
 
   <div class="preset-buttons">
     <button
@@ -198,26 +254,6 @@
     </button>
   </div>
 </div>
-
-<div class="photo-adjustments" aria-labelledby="photo-adjustments-title">
-  <div class="adjustments-heading">
-    <div>
-      <p class="section-kicker">FOTO</p>
-      <h3 id="photo-adjustments-title">Ajustes gerais</h3>
-    </div>
-
-    <button
-      id="reset-photo-adjustments-button"
-      class="secondary-button compact-button"
-      type="button"
-    >
-      Restaurar ajustes
-    </button>
-  </div>
-
-  <p class="adjustments-help">
-    Estes ajustes afetam a foto inteira e também aparecem no download final.
-  </p>
 
   <div class="photo-range">
     <div class="range-heading">

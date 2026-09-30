@@ -546,6 +546,12 @@ function updatePhotoAdjustmentControls() {
 
 function updateSimulation() {
   const area = getSelectedTreatmentArea();
+  const hasPhoto = faceImage.complete && faceImage.naturalWidth > 0;
+  generatePreviewButton.disabled = !hasPhoto || isPreviewing;
+downloadResultButton.disabled = !hasPhoto;
+if (!hasPhoto) {
+  photoStatus.textContent = "Envie uma foto para começar a editar.";
+}
 
   renderTreatmentAreas();
   drawSmoothing();
@@ -562,6 +568,10 @@ function updateSimulation() {
   smoothingPresetButtons.forEach((button) => {
     button.disabled = !hasArea || isPreviewing;
   });
+
+  photoPresetButtons.forEach((button) => {
+  button.disabled = !hasPhoto || isPreviewing;
+});
 
   brightness.disabled = isPreviewing;
   contrast.disabled = isPreviewing;
@@ -596,6 +606,7 @@ function updateSimulation() {
 }
 
 function setEditorDisabled(disabled) {
+  const hasPhoto = faceImage.complete && faceImage.naturalWidth > 0;
   addAreaButton.disabled = disabled;
   duplicateAreaButton.disabled = disabled || !getSelectedTreatmentArea();
   deleteAreaButton.disabled = disabled || !getSelectedTreatmentArea();
@@ -607,6 +618,8 @@ function setEditorDisabled(disabled) {
   saturation.disabled = disabled;
   resetPhotoAdjustmentsButton.disabled = disabled;
   photoUpload.disabled = disabled;
+  generatePreviewButton.disabled = disabled || !hasPhoto;
+downloadResultButton.disabled = disabled || !hasPhoto;
   resetButton.disabled = disabled;
 
   areaButtons.forEach((button) => {
@@ -616,6 +629,10 @@ function setEditorDisabled(disabled) {
   smoothingPresetButtons.forEach((button) => {
     button.disabled = disabled || !getSelectedTreatmentArea();
   });
+
+  photoPresetButtons.forEach((button) => {
+  button.disabled = disabled || !hasPhoto;
+});
 
   updateHistoryButtons();
 }
@@ -965,7 +982,7 @@ photoPresetButtons.forEach((button) => {
     updateSimulation();
     saveHistory();
   });
-});;
+});
 
 photoUpload.addEventListener("change", (event) => {
   const file = event.target.files?.[0];
