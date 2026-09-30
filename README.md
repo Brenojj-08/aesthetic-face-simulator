@@ -1,33 +1,81 @@
-# Aesthetic Face Simulator
+# Simulador de Estética Facial
 
-An educational visual simulator for facial aesthetics concepts.
+Um simulador visual educacional para explorar, de forma interativa, conceitos de estética facial em uma imagem.
 
-## Features
+> Projeto demonstrativo: não oferece aconselhamento médico, recomendações de tratamento, orientação sobre injeções ou garantia de resultados clínicos.
 
-- Selectable facial areas: forehead, glabella, and eye area
-- Adjustable intensity slider
-- Reset simulation button
-- Interactive visual feedback
-- Accessible selection state with `aria-pressed`
-- Responsive layout for mobile screens
-- “How it works” section with usage instructions
-- Visible keyboard focus styles for interactive controls
-- Built with section highlighting HTML, CSS, JavaScript, Git, and GitHub Pages
+## Demonstração
 
-## Technologies
+Acesse a versão publicada:
 
-- HTML
-- CSS
+**[Abrir o simulador](https://github.com/Brenojj-08/aesthetic-face-simulator)**
+
+## Funcionalidades
+
+- Seleção de áreas predefinidas: testa, glabela e área dos olhos
+- Criação e exclusão de áreas de tratamento
+- Reposicionamento das áreas por arrastar e soltar
+- Redimensionamento com uma bolinha no canto da área
+- Controle de intensidade do efeito visual
+- Prévia limpa do resultado, sem elementos de edição
+- Comparação antes/depois ao segurar o botão
+- Upload de imagens PNG, JPG/JPEG e WebP
+- Download do resultado editado em PNG
+- Interface em português
+- Layout responsivo para telas menores
+- Estados acessíveis nos botões, incluindo `aria-pressed`
+
+## Como usar
+
+1. Escolha uma área predefinida ou clique em **Adicionar área**.
+2. Arraste o oval para reposicioná-lo sobre a foto.
+3. Use a bolinha no canto inferior direito para redimensionar a área.
+4. Ajuste a intensidade no controle deslizante.
+5. Clique em **Ver resultado** para ocultar os controles de edição.
+6. Segure o botão para visualizar o antes e solte para voltar ao depois.
+7. Clique em **Baixar imagem editada** para exportar o resultado.
+
+## Tecnologias
+
+- HTML5
+- CSS3
 - JavaScript
-- Git and GitHub
+- Canvas API
+- Git e GitHub
 - GitHub Pages
 
-## Run locally
+## Executar localmente
 
-1. Download or clone this repository.
-2. Open the project folder in Visual Studio Code.
-3. Open `index.html` with the Live Server extension.
+1. Clone ou baixe este repositório:
 
-## Disclaimer
+   ```bash
+   git clone URL_DO_REPOSITORIO
+   ```
 
-This project is an educational visual simulation only. It does not provide medical advice, diagnosis, treatment recommendations, or clinical guidance.
+2. Abra a pasta do projeto no Visual Studio Code.
+3. Abra o `index.html` usando a extensão **Live Server**.
+
+## Estrutura do projeto
+
+```text
+.
+├── index.html
+├── style.css
+├── script.js
+├── face-model.jpg.png
+└── README.md
+```
+
+## Observações
+
+- O efeito visual é uma simulação educacional executada no navegador.
+- As áreas podem ser movidas e redimensionadas livremente.
+- A imagem enviada pelo usuário é processada localmente durante a sessão.
+
+## Aviso
+
+Este projeto é exclusivamente educacional. Ele não oferece aconselhamento médico, diagnóstico, recomendação de tratamento, orientação clínica ou garantia de resultados.
+
+## Autor
+
+Desenvolvido como projeto de interface web interativa.
