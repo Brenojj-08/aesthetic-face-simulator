@@ -1,114 +1,175 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulador de Estética Facial</title>
+  <meta
+    name="description"
+    content="Simulador educacional de visualização facial com processamento local no navegador."
+  >
+  <title>Visualiza — Simulador Facial</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <main>
-    <h1>Simulador de Estética Facial</h1>
+    <header class="hero">
+  <h1>Simulador de Estética Facial</h1>
+  <p>
+    Um simulador visual educacional para explorar conceitos de estética facial.
+  </p>
+</header>
 
-    <p>
-      Um simulador visual educacional para explorar conceitos de estética facial.
-    </p>
 
     <section class="how-it-works" aria-labelledby="how-it-works-title">
-      <h2 id="how-it-works-title">Como funciona</h2>
+      <h2 id="how-it-works-title">Como usar</h2>
       <ol>
-        <li>Selecione uma área facial para visualizar.</li>
-        <li>Ajuste o controle para mudar a intensidade da prévia.</li>
-        <li>Use “Restaurar simulação” para voltar ao estado inicial.</li>
+        <li>Use a imagem de exemplo ou envie uma foto.</li>
+        <li>Adicione uma área, arraste-a e redimensione conforme desejar.</li>
+        <li>Ajuste a intensidade e gere a visualização local.</li>
+        <li>Compare antes e depois, ou baixe o resultado em PNG.</li>
       </ol>
     </section>
 
-    <hr>
+    <section class="editor-section" aria-labelledby="editor-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">EDITOR</p>
+          <h2 id="editor-title">Áreas de visualização</h2>
+        </div>
+        <p id="photo-status" aria-live="polite">Exibindo a imagem de exemplo.</p>
+      </div>
 
-    <h2>Escolha uma área</h2>
+      <div class="preset-actions" aria-label="Áreas predefinidas">
+        <button class="area-button active" data-area="Forehead" aria-pressed="true" type="button">
+          Testa
+        </button>
+        <button class="area-button" data-area="Glabella" aria-pressed="false" type="button">
+          Glabela
+        </button>
+        <button class="area-button" data-area="Eye Area" aria-pressed="false" type="button">
+          Área dos olhos
+        </button>
+      </div>
 
-    <button
-      class="area-button active"
-      data-area="Forehead"
-      aria-pressed="true"
-      type="button"
-    >
-      Testa
-    </button>
+      <p id="selected-area" class="selected-area">Área selecionada: Testa</p>
 
-    <button
-      class="area-button"
-      data-area="Glabella"
-      aria-pressed="false"
-      type="button"
-    >
-      Glabela
-    </button>
+      <p id="area-description">
+        Testa: cria uma nova área ajustável próxima à testa.
+      </p>
 
-    <button
-      class="area-button"
-      data-area="Eye Area"
-      aria-pressed="false"
-      type="button"
-    >
-      Área dos olhos
-    </button>
+      <div id="comparison-shell" class="comparison-shell">
+        <div class="face-container" id="face-container">
+          <img
+            id="face-image"
+            src="face-model.jpg.png"
+            alt="Modelo facial fictício para simulação educacional"
+            draggable="false"
+          >
+          <canvas id="smoothing-canvas" aria-hidden="true"></canvas>
 
-    <button id="reset-button" type="button">Restaurar simulação</button>
+          <div id="comparison-mask" class="comparison-mask" aria-hidden="true">
+            <canvas id="comparison-canvas"></canvas>
+          </div>
 
-    <p id="selected-area">Área selecionada: Testa</p>
+          <div id="comparison-divider" class="comparison-divider" aria-hidden="true"></div>
+          <div
+  id="comparison-divider"
+  class="comparison-divider"
+  aria-hidden="true"
+  hidden
+></div>
+        </div>
+      </div>
 
-    <p id="area-description">
-      Testa: esta demonstração visual destaca uma área comum de expressão facial.
-    </p>
-
-    <div class="face-container">
-      <img
-        id="face-image"
-        src="face-model.jpg.png"
-        alt="Modelo facial fictício para simulação educacional"
-        draggable="false"
+      <div
+        id="comparison-control"
+        class="comparison-control"
+        hidden
       >
+        <label for="comparison-range">Arraste para comparar antes e depois</label>
+        <input
+          id="comparison-range"
+          type="range"
+          min="0"
+          max="100"
+          value="50"
+          aria-label="Comparador antes e depois"
+        >
+        <div class="comparison-labels" aria-hidden="true">
+          <span>Antes</span>
+          <span>Depois</span>
+        </div>
+      </div>
 
-      <canvas id="smoothing-canvas" aria-hidden="true"></canvas>
-    </div>
+      <p class="canvas-help">
+        Clique em uma área para selecioná-la. Arraste o oval para reposicioná-lo
+        e use a bolinha no canto para redimensioná-lo.
+      </p>
+    </section>
 
-    <p class="canvas-help">
-      Arraste a área para reposicionar. Use a bolinha no canto para redimensionar.
-    </p>
+    <section class="controls-section" aria-labelledby="controls-title">
+      <h2 id="controls-title">Controles</h2>
 
-    <h2>Nível da prévia visual</h2>
+      <div class="area-actions">
+        <button id="add-area-button" type="button">Adicionar área</button>
+        <button id="duplicate-area-button" type="button">Duplicar área</button>
+        <button id="delete-area-button" class="danger-button" type="button">
+          Excluir selecionada
+        </button>
+        <button id="clear-areas-button" class="secondary-button" type="button">
+          Limpar áreas
+        </button>
+      </div>
 
-    <div class="area-actions">
-      <button id="add-area-button" type="button">Adicionar área</button>
-      <button id="delete-area-button" type="button">Excluir área selecionada</button>
-      <button id="preview-result-button" type="button">Ver resultado</button>
-      <button id="edit-result-button" type="button" hidden>Voltar à edição</button>
-      <button id="download-result-button" type="button">Baixar imagem editada</button>
-    </div>
+      <div class="area-actions history-actions">
+        <button id="undo-button" class="secondary-button" type="button" disabled>
+          Desfazer
+        </button>
+        <button id="redo-button" class="secondary-button" type="button" disabled>
+          Refazer
+        </button>
+        <button id="reset-button" class="secondary-button" type="button">
+          Restaurar padrão
+        </button>
+      </div>
 
-    <label for="intensity">Intensidade da área: suave ↔ realçada</label>
-    <br>
-    <input id="intensity" type="range" min="0" max="100" value="0">
+      <div class="range-control">
+        <div class="range-heading">
+          <label for="intensity">Intensidade da área</label>
+          <output id="intensity-output" for="intensity">0%</output>
+        </div>
+        <input id="intensity" type="range" min="0" max="100" value="0">
+        <p id="intensity-value">Intensidade da área selecionada: 0%</p>
+      </div>
 
-    <p id="intensity-value">Intensidade da área selecionada: 0%</p>
+      <div class="result-actions">
+        <button id="generate-preview-button" class="primary-result-button" type="button">
+          Gerar visualização local
+        </button>
+        <button id="edit-result-button" type="button" hidden>
+          Voltar à edição
+        </button>
+        <button id="download-result-button" class="download-button" type="button">
+          Baixar imagem em PNG
+        </button>
+      </div>
 
-    <p class="simulation-note">
-      Selecione um oval e arraste para reposicioná-lo ou redimensioná-lo.
-      Você pode adicionar mais áreas para diferentes partes da foto.
-    </p>
+      <p id="generation-status" class="generation-status" aria-live="polite"></p>
+    </section>
 
-    <label for="photo-upload">Escolha uma foto</label>
-    <br>
-    <input
-      id="photo-upload"
-      type="file"
-      accept="image/png, image/jpeg, image/webp"
-    >
-
-    <p id="photo-status" aria-live="polite">
-      Exibindo a imagem de exemplo.
-    </p>
+    <section class="upload-section" aria-labelledby="upload-title">
+      <h2 id="upload-title">Usar outra imagem</h2>
+      <label class="upload-label" for="photo-upload">
+        <span>Selecionar imagem</span>
+        <small>PNG, JPG ou WEBP</small>
+      </label>
+      <input
+        id="photo-upload"
+        type="file"
+        accept="image/png, image/jpeg, image/webp"
+      >
+    </section>
 
     <section class="built-with" aria-labelledby="built-with-title">
       <h2 id="built-with-title">Tecnologias utilizadas</h2>
@@ -116,16 +177,23 @@
         <li>HTML</li>
         <li>CSS</li>
         <li>JavaScript</li>
+        <li>Canvas API</li>
         <li>Git</li>
         <li>GitHub Pages</li>
       </ul>
     </section>
 
-    <p>
-      <strong>Simulação exclusivamente educacional.</strong>
-      Este projeto não oferece aconselhamento médico, recomendações de tratamento,
-      orientação sobre injeções ou garantia de resultados clínicos.
-    </p>
+    <footer class="project-footer">
+      <p>
+        <strong>Simulação exclusivamente educacional.</strong>
+        Esta ferramenta não oferece aconselhamento médico, recomendação de tratamento,
+        diagnóstico, orientação sobre procedimentos ou garantia de resultados clínicos.
+      </p>
+      <p>
+        A visualização local aplica uma sobreposição gráfica e não representa um
+        resultado de procedimento estético.
+      </p>
+    </footer>
   </main>
 
   <script src="script.js"></script>
