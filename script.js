@@ -19,6 +19,11 @@ const intensity = document.getElementById("intensity");
 const intensityValue = document.getElementById("intensity-value");
 const intensityOutput = document.getElementById("intensity-output");
 
+const texture = document.getElementById("texture");
+const textureValue = document.getElementById("texture-value");
+const textureOutput = document.getElementById("texture-output");
+const smoothingPresetButtons = document.querySelectorAll(".smoothing-preset");
+
 const photoUpload = document.getElementById("photo-upload");
 const photoStatus = document.getElementById("photo-status");
 const faceImage = document.getElementById("face-image");
@@ -34,7 +39,7 @@ const comparisonDivider = document.getElementById("comparison-divider");
 const comparisonControl = document.getElementById("comparison-control");
 const comparisonRange = document.getElementById("comparison-range");
 
-const STORAGE_KEY = "visualiza-simulator-settings-v1";
+const STORAGE_KEY = "visualiza-simulator-settings-v2";
 
 const areaDescriptions = {
   Forehead: "Testa: cria uma nova área ajustável próxima à testa.",
@@ -73,6 +78,14 @@ function createSnapshot() {
   };
 }
 
+function normalizeArea(area) {
+  return {
+    ...area,
+    intensity: Number(area.intensity ?? 0),
+    texture: Number(area.texture ?? 65)
+  };
+}
+
 function persistSettings() {
   const settings = {
     treatmentAreas,
@@ -92,7 +105,7 @@ function restorePersistedSettings() {
       return false;
     }
 
-    treatmentAreas = saved.treatmentAreas;
+    treatmentAreas = saved.treatmentAreas.map(normalizeArea);
     selectedAreaId = saved.selectedAreaId;
     nextAreaId = saved.nextAreaId || treatmentAreas.length + 1;
     comparisonRange.value = saved.comparisonPosition || "50";
@@ -129,7 +142,7 @@ function saveHistory() {
 }
 
 function restoreSnapshot(snapshot) {
-  treatmentAreas = cloneAreas(snapshot.treatmentAreas);
+  treatmentAreas = cloneAreas(snapshot.treatmentAreas).map(normalizeArea);
   selectedAreaId = snapshot.selectedAreaId;
   nextAreaId = snapshot.nextAreaId;
 
@@ -178,7 +191,8 @@ function createTreatmentArea(config = {}, recordHistory = true) {
     y: config.y ?? 25,
     width: config.width ?? 40,
     height: config.height ?? 24,
-    intensity: config.intensity ?? 0
+    intensity: config.intensity ?? 55,
+texture: config.texture ?? 68
   };
 
   nextAreaId += 1;
@@ -219,7 +233,8 @@ function duplicateSelectedArea() {
     y: clamp(area.y + 4, 0, 100 - area.height),
     width: area.width,
     height: area.height,
-    intensity: area.intensity
+    intensity: area.intensity,
+    texture: area.texture
   });
 }
 
@@ -312,6 +327,32 @@ function renderTreatmentAreas() {
   });
 }
 
+function drawSoftMask(context, centerX, centerY, radiusX, radiusY) {
+  const gradient = context.createRadialGradient(
+    centerX,
+    centerY,
+    Math.min(radiusX, radiusY) * 0.42,
+    centerX,
+    centerY,
+    Math.max(radiusX, radiusY)
+  );
+
+  gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+  gradient.addColorStop(0.65, "rgba(255, 255, 255, 0.92)");
+  gradient.addColorStop(0.86, "rgba(255, 255, 255, 0.35)");
+  gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+  context.save();
+  context.translate(centerX, centerY);
+  context.scale(1, radiusY / radiusX);
+  context.beginPath();
+  context.arc(0, 0, radiusX, 0, Math.PI * 2);
+  context.closePath();
+  context.fillStyle = gradient;
+  context.fill();
+  context.restore();
+}
+
 function drawSmoothingOn(context, width, height) {
   treatmentAreas.forEach((area) => {
     if (area.intensity === 0) {
@@ -320,29 +361,31 @@ function drawSmoothingOn(context, width, height) {
 
     const centerX = width * ((area.x + area.width / 2) / 100);
     const centerY = height * ((area.y + area.height / 2) / 100);
-    const radiusX = width * (area.width / 200) * 0.84;
-    const radiusY = height * (area.height / 200) * 0.84;
+    const radiusX = width * (area.width / 200) * 0.92;
+    const radiusY = height * (area.height / 200) * 0.92;
 
-    const blurAmount = 0.25 + (area.intensity / 100) * 1.8;
-    const effectOpacity = 0.12 + (area.intensity / 100) * 0.32;
+    const smoothStrength = area.intensity / 100;
+    const textureRetention = area.texture / 100;
 
-    context.save();
-    context.beginPath();
-    context.ellipse(
-      centerX,
-      centerY,
-      radiusX,
-      radiusY,
-      0,
-      0,
-      Math.PI * 2
-    );
-    context.clip();
+    /*
+      Mais intensidade = mais blur e mais opacidade.
+      Mais textura = menos opacidade, mas sem anular o efeito.
+    */
+    const blurAmount = 0.8 + smoothStrength * 5.2;
+const effectOpacity =
+  (0.10 + smoothStrength * 0.30) *
+  (1 - textureRetention * 0.42);
 
-    context.filter = `blur(${blurAmount}px)`;
-    context.globalAlpha = effectOpacity;
+    const effectCanvas = document.createElement("canvas");
+    const effectContext = effectCanvas.getContext("2d");
 
-    context.drawImage(
+    effectCanvas.width = width;
+    effectCanvas.height = height;
+
+    effectContext.save();
+    effectContext.filter = `blur(${blurAmount}px)`;
+
+    effectContext.drawImage(
       faceImage,
       0,
       0,
@@ -354,6 +397,46 @@ function drawSmoothingOn(context, width, height) {
       height
     );
 
+    effectContext.restore();
+
+    const maskCanvas = document.createElement("canvas");
+    const maskContext = maskCanvas.getContext("2d");
+
+    maskCanvas.width = width;
+    maskCanvas.height = height;
+
+    maskContext.save();
+    maskContext.translate(centerX, centerY);
+    maskContext.scale(1, radiusY / radiusX);
+
+    const gradient = maskContext.createRadialGradient(
+      0,
+      0,
+      radiusX * 0.28,
+      0,
+      0,
+      radiusX
+    );
+
+    gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+    gradient.addColorStop(0.58, "rgba(255, 255, 255, 0.98)");
+    gradient.addColorStop(0.78, "rgba(255, 255, 255, 0.72)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+    maskContext.fillStyle = gradient;
+    maskContext.beginPath();
+    maskContext.arc(0, 0, radiusX, 0, Math.PI * 2);
+    maskContext.fill();
+    maskContext.restore();
+
+    effectContext.save();
+    effectContext.globalCompositeOperation = "destination-in";
+    effectContext.drawImage(maskCanvas, 0, 0);
+    effectContext.restore();
+
+    context.save();
+    context.globalAlpha = effectOpacity;
+    context.drawImage(effectCanvas, 0, 0);
     context.restore();
   });
 }
@@ -397,6 +480,17 @@ function updateComparisonPosition(shouldPersist = true) {
   }
 }
 
+function updatePresetButtons(area) {
+  smoothingPresetButtons.forEach((button) => {
+    const matchesPreset =
+      area &&
+      Number(button.dataset.intensity) === area.intensity &&
+      Number(button.dataset.texture) === area.texture;
+
+    button.classList.toggle("active", matchesPreset);
+  });
+}
+
 function updateSimulation() {
   const area = getSelectedTreatmentArea();
 
@@ -406,23 +500,39 @@ function updateSimulation() {
   const hasArea = Boolean(area);
 
   intensity.disabled = !hasArea || isPreviewing;
+  texture.disabled = !hasArea || isPreviewing;
   deleteAreaButton.disabled = !hasArea || isPreviewing;
   duplicateAreaButton.disabled = !hasArea || isPreviewing;
   clearAreasButton.disabled = !treatmentAreas.length || isPreviewing;
 
+  smoothingPresetButtons.forEach((button) => {
+    button.disabled = !hasArea || isPreviewing;
+  });
+
   if (!area) {
     intensity.value = "0";
+    texture.value = "65";
     intensityOutput.textContent = "0%";
+    textureOutput.textContent = "65%";
     intensityValue.textContent = "Nenhuma área de visualização selecionada.";
+    textureValue.textContent =
+      "Quanto maior o valor, mais detalhes originais são preservados.";
+
+    updatePresetButtons(null);
     updateHistoryButtons();
     return;
   }
 
   intensity.value = String(area.intensity);
+  texture.value = String(area.texture);
   intensityOutput.textContent = `${area.intensity}%`;
+  textureOutput.textContent = `${area.texture}%`;
   intensityValue.textContent =
-    `Intensidade da área ${area.id}: ${area.intensity}%`;
+    `Suavização da área ${area.id}: ${area.intensity}%.`;
+  textureValue.textContent =
+    `${area.texture}% de textura natural preservada.`;
 
+  updatePresetButtons(area);
   updateHistoryButtons();
 }
 
@@ -432,11 +542,16 @@ function setEditorDisabled(disabled) {
   deleteAreaButton.disabled = disabled || !getSelectedTreatmentArea();
   clearAreasButton.disabled = disabled || !treatmentAreas.length;
   intensity.disabled = disabled || !getSelectedTreatmentArea();
+  texture.disabled = disabled || !getSelectedTreatmentArea();
   photoUpload.disabled = disabled;
   resetButton.disabled = disabled;
 
   areaButtons.forEach((button) => {
     button.disabled = disabled;
+  });
+
+  smoothingPresetButtons.forEach((button) => {
+    button.disabled = disabled || !getSelectedTreatmentArea();
   });
 
   updateHistoryButtons();
@@ -522,7 +637,7 @@ function downloadEditedImage() {
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = "visualizacao-facial-local.png";
+    link.download = "edicao-facial-suave.png";
 
     document.body.appendChild(link);
     link.click();
@@ -551,15 +666,30 @@ function selectAreaPreset(button) {
   areaDescription.textContent = areaDescriptions[areaName];
 
   if (areaName === "Forehead") {
-    createTreatmentArea({ x: 27, y: 18, width: 46, height: 28 });
+    createTreatmentArea({
+      x: 27,
+      y: 18,
+      width: 46,
+      height: 28
+    });
   }
 
   if (areaName === "Glabella") {
-    createTreatmentArea({ x: 35, y: 31, width: 30, height: 16 });
+    createTreatmentArea({
+      x: 35,
+      y: 31,
+      width: 30,
+      height: 16
+    });
   }
 
   if (areaName === "Eye Area") {
-    createTreatmentArea({ x: 22, y: 35, width: 56, height: 24 });
+    createTreatmentArea({
+      x: 22,
+      y: 35,
+      width: 56,
+      height: 24
+    });
   }
 }
 
@@ -583,7 +713,17 @@ function resetToDefault() {
   areaDescription.textContent =
     "Testa: cria uma nova área ajustável próxima à testa.";
 
-  createTreatmentArea({ x: 27, y: 18, width: 46, height: 28 }, false);
+  createTreatmentArea(
+    {
+      x: 27,
+      y: 18,
+      width: 46,
+      height: 28,
+      intensity: 55,
+      texture: 68
+    },
+    false
+  );
 
   updateSimulation();
   saveHistory();
@@ -641,6 +781,22 @@ areaButtons.forEach((button) => {
   button.addEventListener("click", () => selectAreaPreset(button));
 });
 
+smoothingPresetButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const area = getSelectedTreatmentArea();
+
+    if (!area || isPreviewing) {
+      return;
+    }
+
+    area.intensity = Number(button.dataset.intensity);
+    area.texture = Number(button.dataset.texture);
+
+    updateSimulation();
+    saveHistory();
+  });
+});
+
 addAreaButton.addEventListener("click", () => createTreatmentArea());
 duplicateAreaButton.addEventListener("click", duplicateSelectedArea);
 deleteAreaButton.addEventListener("click", deleteSelectedTreatmentArea);
@@ -667,12 +823,23 @@ intensity.addEventListener("input", () => {
   }
 
   area.intensity = Number(intensity.value);
-  intensityOutput.textContent = `${area.intensity}%`;
-
   updateSimulation();
 });
 
 intensity.addEventListener("change", saveHistory);
+
+texture.addEventListener("input", () => {
+  const area = getSelectedTreatmentArea();
+
+  if (!area || isPreviewing) {
+    return;
+  }
+
+  area.texture = Number(texture.value);
+  updateSimulation();
+});
+
+texture.addEventListener("change", saveHistory);
 
 photoUpload.addEventListener("change", (event) => {
   const file = event.target.files?.[0];
@@ -716,7 +883,12 @@ document.addEventListener("keydown", (event) => {
     target instanceof HTMLTextAreaElement ||
     target instanceof HTMLSelectElement;
 
-  if (isTyping && target !== intensity && target !== comparisonRange) {
+  if (
+    isTyping &&
+    target !== intensity &&
+    target !== texture &&
+    target !== comparisonRange
+  ) {
     return;
   }
 

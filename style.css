@@ -729,3 +729,64 @@ button:active:not(:disabled) {
   font-size: 0.86rem;
   line-height: 1.5;
 }
+
+.texture-control {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(141, 60, 104, 0.14);
+}
+
+#texture-value {
+  margin: 0;
+  color: #6b6170;
+  font-size: 0.9rem;
+}
+
+.smoothing-presets {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(141, 60, 104, 0.14);
+}
+
+.smoothing-presets > p {
+  margin: 0 0 10px;
+  color: #543448;
+  font-weight: 700;
+}
+
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preset-buttons button {
+  flex: 1;
+  min-width: 100px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(141, 60, 104, 0.24);
+  background: #ffffff;
+  color: #6f2d51;
+  box-shadow: none;
+}
+
+.preset-buttons button:hover:not(:disabled) {
+  background: #fff1f7;
+}
+
+.preset-buttons button.active {
+  border-color: #8d3c68;
+  background: #8d3c68;
+  color: #ffffff;
+}
+
+@media (max-width: 600px) {
+  .preset-buttons {
+    display: grid;
+  }
+
+  .preset-buttons button {
+    width: 100%;
+  }
+}

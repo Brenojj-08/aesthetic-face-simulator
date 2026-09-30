@@ -135,13 +135,65 @@
       </div>
 
       <div class="range-control">
-        <div class="range-heading">
-          <label for="intensity">Intensidade da área</label>
-          <output id="intensity-output" for="intensity">0%</output>
-        </div>
-        <input id="intensity" type="range" min="0" max="100" value="0">
-        <p id="intensity-value">Intensidade da área selecionada: 0%</p>
-      </div>
+  <div class="range-heading">
+    <label for="intensity">Suavização da área</label>
+    <output id="intensity-output" for="intensity">0%</output>
+  </div>
+
+  <input id="intensity" type="range" min="0" max="100" value="0">
+
+  <p id="intensity-value">
+    Suavização da área selecionada: 0%
+  </p>
+
+  <div class="texture-control">
+    <div class="range-heading">
+      <label for="texture">Textura natural</label>
+      <output id="texture-output" for="texture">65%</output>
+    </div>
+
+    <input id="texture" type="range" min="0" max="100" value="65">
+
+    <p id="texture-value">
+      Quanto maior o valor, mais detalhes originais são preservados.
+    </p>
+  </div>
+
+  <div class="smoothing-presets" aria-label="Presets de suavização">
+    <p>Presets rápidos</p>
+
+    <div class="preset-buttons">
+
+     <button
+  class="smoothing-preset"
+  type="button"
+  data-intensity="30"
+  data-texture="85"
+>
+  Suave
+</button>
+
+<button
+  class="smoothing-preset active"
+  type="button"
+  data-intensity="55"
+  data-texture="68"
+>
+  Natural
+</button>
+
+<button
+  class="smoothing-preset"
+  type="button"
+  data-intensity="78"
+  data-texture="42"
+>
+  Intenso
+</button>
+
+    </div>
+  </div>
+</div>
 
  <div class="result-actions">
   <button id="generate-preview-button" class="primary-result-button" type="button">
