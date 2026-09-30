@@ -16,18 +16,14 @@ Acesse a versão publicada:
 
 ## Funcionalidades
 
-- Seleção de áreas predefinidas: testa, glabela e área dos olhos
-- Criação e exclusão de áreas de tratamento
-- Reposicionamento das áreas por arrastar e soltar
-- Redimensionamento com uma bolinha no canto da área
-- Controle de intensidade do efeito visual
-- Prévia limpa do resultado, sem elementos de edição
-- Comparação antes/depois ao segurar o botão
-- Upload de imagens PNG, JPG/JPEG e WebP
-- Download do resultado editado em PNG
-- Interface em português
-- Layout responsivo para telas menores
-- Estados acessíveis nos botões, incluindo `aria-pressed`
+- Controle de textura natural da área suavizada
+- Presets de suavização: suave, natural e intenso
+- Ajustes gerais de brilho, contraste e saturação
+- Presets rápidos de foto
+- Botão para restaurar ajustes gerais
+- Comparador interativo antes/depois
+- Processamento local da imagem no navegador
+- Layout em duas colunas no computador, com controles visíveis durante a edição
 
 ## Como usar
 
@@ -51,14 +47,17 @@ Acesse a versão publicada:
 
 ## Executar localmente
 
-1. Clone ou baixe este repositório:
+Clone o repositório:
 
-   ```bash
-   git clone [https://github.com/Brenojj-08/aesthetic-face-simulator/tree/main](https://github.com/Brenojj-08/aesthetic-face-simulator.git)
-   ```
+```bash
+git clone [https://github.com/Brenojj-08/aesthetic-face-simulator.git](https://github.com/Brenojj-08/aesthetic-face-simulator.git)
+```
 
-2. Abra a pasta do projeto no Visual Studio Code.
-3. Abra o `index.html` usando a extensão **Live Server**.
+Depois:
+
+1. Abra a pasta do projeto no Visual Studio Code.
+2. Abra o arquivo `index.html` com a extensão Live Server.
+3. Acesse o endereço local exibido pelo Live Server.
 
 ## Estrutura do projeto
 
@@ -73,10 +72,11 @@ Acesse a versão publicada:
 
 ## Observações
 
-- O efeito visual é uma simulação educacional executada no navegador.
-- As áreas podem ser movidas e redimensionadas livremente.
-- A imagem enviada pelo usuário é processada localmente durante a sessão.
-
+- O processamento é executado localmente no navegador.
+- As imagens enviadas não são enviadas para um servidor por esta versão do projeto.
+- Ao carregar uma nova foto, os ajustes gerais começam em zero.
+- O download é gerado em PNG e inclui os ajustes de foto e a suavização aplicada.
+- A ferramenta é uma simulação visual educacional e não representa resultado clínico.
 
 ## Autor
 
