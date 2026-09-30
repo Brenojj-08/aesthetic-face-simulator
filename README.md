@@ -31,13 +31,14 @@ Acesse a versão publicada:
 
 ## Como usar
 
-1. Escolha uma área predefinida ou clique em **Adicionar área**.
-2. Arraste o oval para reposicioná-lo sobre a foto.
-3. Use a bolinha no canto inferior direito para redimensionar a área.
-4. Ajuste a intensidade no controle deslizante.
-5. Clique em **Ver resultado** para ocultar os controles de edição.
-6. Segure o botão para visualizar o antes e solte para voltar ao depois.
-7. Clique em **Baixar imagem editada** para exportar o resultado.
+1. Envie uma imagem em PNG, JPG/JPEG ou WebP.
+2. Escolha uma área predefinida — testa, glabela ou área dos olhos — ou clique em **Adicionar área**.
+3. Arraste e redimensione o oval sobre a região desejada.
+4. Ajuste a suavização e a preservação de textura da área selecionada.
+5. Use os presets de suavização, se desejar.
+6. Em **Ajustes gerais**, altere brilho, contraste e saturação ou escolha um preset de foto.
+7. Clique em **Gerar visualização local** para comparar antes e depois.
+8. Clique em **Baixar imagem em PNG** para exportar o resultado.
 
 ## Tecnologias
 
