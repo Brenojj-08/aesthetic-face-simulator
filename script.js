@@ -26,6 +26,12 @@ const areaDescriptions = {
   "Eye Area": "Área dos olhos: cria uma nova área ajustável ao redor dos olhos."
 };
 
+const areaNamesInPortuguese = {
+  Forehead: "Testa",
+  Glabella: "Glabela",
+  "Eye Area": "Área dos olhos"
+};
+
 let selectedPhotoUrl = "";
 let selectedAreaId = null;
 let interaction = null;
@@ -353,26 +359,13 @@ function selectAreaPreset(button) {
   }
 
   const areaName = button.dataset.area;
-const areaNamesInPortuguese = {
-  Forehead: "Testa",
-  Glabella: "Glabela",
-  "Eye Area": "Área dos olhos"
-};
 
-selectedArea.textContent =
-  `Área selecionada: ${areaNamesInPortuguese[areaName]}`;
   areaButtons.forEach((areaButton) => {
     const isSelected = areaButton === button;
 
     areaButton.classList.toggle("active", isSelected);
     areaButton.setAttribute("aria-pressed", String(isSelected));
   });
-
-  const areaNamesInPortuguese = {
-  Forehead: "Testa",
-  Glabella: "Glabela",
-  "Eye Area": "Área dos olhos"
-};
 
 selectedArea.textContent =
   `Área selecionada: ${areaNamesInPortuguese[areaName]}`;
