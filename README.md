@@ -1,4 +1,4 @@
-# Projeto experimental: Simulador de Estética Facial
+# Projeto experimental: Simulador de Estética Facial (Em desenvolvimento)
 
 Um simulador visual educacional para explorar, de forma interativa, conceitos de estética facial em uma imagem.
 
